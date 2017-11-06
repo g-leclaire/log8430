@@ -1,0 +1,32 @@
+a {
+	color: blue;
+	text-decoration: underline;
+}
+.inline {
+	display: inline;
+}
+#player {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+#player-slider {
+	display: inline-block;
+	background-color: LightGray;
+	width: 300px;
+	margin-left: 15px;
+}
+#player-progress {
+	background-color: black;
+	height: 5px;
+	width: 0%;
+	position: relative;
+}
+#player-progress-hand {
+	position: absolute;
+	background: rgb(130,130,130);
+	width: 10px;
+	height: 10px;
+	right: -5px;
+	border-radius: 5px;
+	bottom: -3px;
+}
