@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    @*<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>@ViewData["Title"] - music_ap</title>
+
+     <environment include="Development">
+         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+         <link rel="stylesheet" href="~/css/site.css" />
+     </environment>
+     <environment exclude="Development">
+         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+     </environment>*@
+      <title>musicz Website Template | details :: w3layouts</title>
+        <link href="~/css/bootstrap.css" rel='stylesheet' type='text/css' />
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="~/js/jquery.min.js"></script>
+        <!-- Custom Theme files -->
+        <link href="~/css/site.css" rel='stylesheet' type='text/css' />
+        <!-- Custom Theme files -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="~/application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+      
+        <!----webfonts--->
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,700,800,400,600' rel='stylesheet' type='text/css'>
+        <!---//webfonts--->
+    
+</head>
+<body>
+    <!-- container -->
+    <div class="header top-header">
+        <div class="container">
+            <!-- header -->
+            <!-- logo -->
+            <div class="logo">
+                <a href="index.cshtml"><img src="images/logo.png" title="Music" /></a>
+            </div>
+            <!-- logo -->
+            <!-- top-nav -->
+            <div class="top-nav">
+                <span class="menu"> </span>
+                <ul>
+                    <li class="active"><a href="">All music<span> </span></a></li>
+                    <li><a href="/Home/About">PLaylist</a></li>
+                    <li><a href="/Home/Contact">Contact</a></li>
+                    <div class="clearfix"> </div>
+                </ul>
+            </div>
+            <div class="clearfix"> </div>
+            <!-- top-nav -->
+            <!-- script-for-menu -->
+            <script>
+                $(document).ready(function () {
+                    $("span.menu").click(function () {
+                        $(".top-nav ul").slideToggle(200);
+                    });
+                });
+            </script>
+            <!-- script-for-menu -->
+        </div>
+        <!-- header -->
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        
+        <!-- footer -->
+        <div class="footer">
+            <div class="container">
+                <div class="footer-grids">
+                    <div class="col-md-3">
+                        <div class="footer-grid">
+                            <h5>Developer</h5>
+                            <p> Omar</p>
+                            <p> Geoffrey</p>
+                            <p> Martin</p>
+                            <p> Adnan</p>
+                        </div>
+                    </div>
+                    <div class="clearfix"> </div>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/js/handlebars.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        @*<script src="script.js"></script> <link rel="stylesheet" type="text/css" href="styles.css">*@
+
+    </environment>
+    
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

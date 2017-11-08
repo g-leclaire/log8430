@@ -1,0 +1,11 @@
+c:\users\nemer\source\repos\Music_app\music_ap\bin\Debug\netcoreapp2.0\music_ap.deps.json
+c:\users\nemer\source\repos\Music_app\music_ap\bin\Debug\netcoreapp2.0\music_ap.runtimeconfig.json
+c:\users\nemer\source\repos\Music_app\music_ap\bin\Debug\netcoreapp2.0\music_ap.runtimeconfig.dev.json
+c:\users\nemer\source\repos\Music_app\music_ap\bin\Debug\netcoreapp2.0\music_ap.dll
+c:\users\nemer\source\repos\Music_app\music_ap\bin\Debug\netcoreapp2.0\music_ap.pdb
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.csprojResolveAssemblyReference.cache
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.csproj.CoreCompileInputs.cache
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.AssemblyInfoInputs.cache
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.AssemblyInfo.cs
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.dll
+c:\users\nemer\source\repos\Music_app\music_ap\obj\Debug\netcoreapp2.0\music_ap.pdb

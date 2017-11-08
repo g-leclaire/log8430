@@ -1,0 +1,247 @@
+﻿@{
+    ViewData["Title"] = "Contact";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<script src="~/js/spotify-web-api.js"></script>
+<div class="container">
+    <h1>Search for an Artist</h1>
+    <p>Type an artist name and click on "Search". Then, click on any album from the results to play 30 seconds of its first track.</p>
+    <form id="search-form">
+        <input type="text" id="query" value="" class="form-control" placeholder="Type an Artist Name" />
+        <input type="submit" id="search" class="btn btn-primary" value="Search" />
+    </form>
+    <div id="results"></div>
+</div>
+<script id="results-template" type="text/x-handlebars-template">
+    {{#each albums.items}}
+    <div style="background-image:url({{images.0.url}})" data-album-id="{{id}}" class="cover"></div>
+    {{/each}}
+</script>
+<script>
+      (function () {
+
+          /**
+           * Obtains parameters from the hash of the URL
+           * return Object
+           */
+          function getHashParams() {
+              var hashParams = {};
+              var e, r = /([^&;=]+)=?([^&;]*)/g,
+                  q = window.location.hash.substring(1);
+              while (e = r.exec(q)) {
+                  hashParams[e[1]] = decodeURIComponent(e[2]);
+              }
+              return hashParams;
+          }
+
+          var params = getHashParams();
+
+          var access_token = params.access_token,
+              refresh_token = params.refresh_token,
+              error = params.error;
+
+
+
+
+          var Song = {
+              title: "",
+              artist: "",
+              album: "",
+              year: "",
+              id: "",
+              href: ""
+          };
+
+          SearchField = {
+              TITLE: 0,
+              ALBUM: 1
+          }
+
+          function searchSong(songType, value) {
+              var mySongList = [];
+              if (songType == SearchField.TITLE) {
+                  if (access_token) {
+                      $.ajax({
+                          url: 'https://api.spotify.com/v1/search?q=' + value + '&type=track&limit=20',
+                          headers: {
+                              'Authorization': 'Bearer ' + access_token
+                          },
+                          success: function (response) {
+                              for (var i = 0; i < response.tracks.items.length; i++) {
+                                  var mySong = {
+                                      title: response.tracks.items[i].name,
+                                      artist: response.tracks.items[i].artists[0].name,
+                                      album: response.tracks.items[i].album.name,
+                                      //year: response.tracks.items[i],
+                                      id: response.tracks.items[i].id,
+                                      href: response.tracks.items[i].href
+                                  };
+                                  mySongList.push(mySong);
+                              }
+                          }
+                      })
+                  }
+              }
+              else if (songType == SearchField.ALBUM) {
+                  if (access_token) {
+                      $.ajax({
+                          url: 'https://api.spotify.com/v1/search?q=' + value + '&type=album&limit=20',
+                          headers: {
+                              'Authorization': 'Bearer ' + access_token
+                          },
+                          success: function (response) {
+                              console.log(response);
+                              for (var i = 0; i < response.albums.items.length; i++) {
+                                  var mySong = {
+                                      title: response.albums.items[i].name,
+                                      artist: response.albums.items[i].artists[0].name,
+                                      album: response.albums.items[i].album_type,
+                                      //year: response.albums.items[i],
+                                      id: response.albums.items[i].id,
+                                      href: response.albums.items[i].href
+                                  };
+                                  mySongList.push(mySong);
+                              }
+                          }
+                      })
+                  }
+              }
+              //console.log(mySongList);
+              return mySongList;
+          }
+
+          if (error) {
+              alert('There was an error during the authentication');
+          } else {
+              if (access_token) {
+                  var maListe = searchSong(SearchField.ALBUM, "martin");
+                  console.log("MA LISTE : ");
+                  console.log(maListe);
+                  console.log("APRES MA LISTE!");
+                  //Playlist
+                  ///*
+                  $.ajax({
+                      //url: 'https://api.spotify.com/v1/search?q=beatle&type=track',
+                      url: 'https://api.spotify.com/v1/search?q=jackson&type=playlist&limit=15',
+                      headers: {
+                          'Authorization': 'Bearer ' + access_token
+                      },
+                      success: function (response) {
+                          //console.log(response);
+                          var songDiv = document.getElementById("song-list");
+                          for (var i = 0; i < response.playlists.items.length; i++) {
+                              var newLink = document.createElement("a");
+                              //newLink.href = "https://open.spotify.com/track/" + response.tracks.items[i].id;
+                              newLink.href = response.playlists.items[i].external_urls.spotify;
+                              newLink.innerHTML = response.playlists.items[i].name;
+                              songDiv.appendChild(newLink);
+                              var lineJump = document.createElement("br");
+                              songDiv.appendChild(lineJump);
+                          }
+                          $('#login').hide();
+                          $('#loggedin').show();
+                      }
+                  });
+                  //*/
+                  //Track
+
+                  /*
+                  $.ajax({
+                      url: 'https://api.spotify.com/v1/search?q=beatle&type=track&limit=15',
+                      headers: {
+                        'Authorization': 'Bearer ' + access_token
+                      },
+                      success: function(response) {
+                      console.log(response);
+                      var songDiv = document.getElementById("song-list");
+                      for(var i =0; i< response.tracks.items.length ; i++)
+                      {
+                          var newLink = document.createElement("a");
+                          newLink.href = response.tracks.items[i].external_urls.spotify;
+                          newLink.innerHTML = response.tracks.items[i].name;
+                          songDiv.appendChild(newLink);
+                          var lineJump = document.createElement("br");
+                          songDiv.appendChild(lineJump);
+                      }
+                          $('#login').hide();
+                          $('#loggedin').show();
+                      }
+                  });
+                  */
+
+                  //Artiste
+
+                  /*
+                  $.ajax({
+                      url: 'https://api.spotify.com/v1/search?q=beatle&type=artist&limit=15',
+                      headers: {
+                        'Authorization': 'Bearer ' + access_token
+                      },
+                      success: function(response) {
+                      console.log(response);
+                      var songDiv = document.getElementById("song-list");
+                      for(var i =0; i< response.artists.items.length ; i++)
+                      {
+                          var newLink = document.createElement("a");
+                          newLink.href = response.artists.items[i].external_urls.spotify;
+                          newLink.innerHTML = response.artists.items[i].name;
+                          songDiv.appendChild(newLink);
+                          var lineJump = document.createElement("br");
+                          songDiv.appendChild(lineJump);
+                      }
+                          $('#login').hide();
+                          $('#loggedin').show();
+                      }
+                  });
+                  */
+
+                  //Album
+
+                  /*
+                  $.ajax({
+                      url: 'https://api.spotify.com/v1/search?q=beatle&type=album&limit=15',
+                      headers: {
+                        'Authorization': 'Bearer ' + access_token
+                      },
+                      success: function(response) {
+                      console.log(response);
+                      var songDiv = document.getElementById("song-list");
+                      for(var i =0; i< response.albums.items.length ; i++)
+                      {
+                          var newLink = document.createElement("a");
+                          newLink.href = response.albums.items[i].external_urls.spotify;
+                          newLink.innerHTML = response.albums.items[i].name;
+                          songDiv.appendChild(newLink);
+                          var lineJump = document.createElement("br");
+                          songDiv.appendChild(lineJump);
+                      }
+                          $('#login').hide();
+                          $('#loggedin').show();
+                      }
+                  });
+                  */
+
+              } else {
+                  // render initial screen
+                  $('#login').show();
+                  $('#loggedin').hide();
+              }
+
+              document.getElementById('obtain-new-token').addEventListener('click', function () {
+                  $.ajax({
+                      url: '/refresh_token',
+                      data: {
+                          'refresh_token': refresh_token
+                      }
+                  }).done(function (data) {
+                      access_token = data.access_token;
+                  });
+              }, false);
+          }
+      })();
+</script>
+
+
+ 
