@@ -81,30 +81,34 @@ function afficherMaPlayList()
 			var songDiv = document.createElement("div");
 			songDiv.className = "song";
 			
+			//Si le type de la chanson est un spotify
 			if(song.type == "spotify")
 			{
 				songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.objet.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artists[0].name + ' - ' + song.objet.name + "</p><button id=\"add-to-playList\">X</button></div></a></div>"						
 				myPlayListTab.appendChild(songDiv);
+				//On ajoute l'evenement lorsque le bouton de retrait est cliqué
+				document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
+					var nouvelleEntree = song;
+					retirerChanson(nouvelleEntree);
+					//On evite le comportement par defaut pour eviter une redirection de l'ancre (<a...>)
+					e.preventDefault();
+					e.stopPropagation();
+				}
 			}
 			else if(song.type == "deezer")
 			{
 				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artist.name + ' - ' + song.objet.title + "</p><button id=\"add-to-playList\">X</button></div></div>"			
 				myPlayListTab.appendChild(songDiv);
-				myPlayListTab.lastChild.lastChild.lastChild.onclick = function(e){
-					playSong(song);
+				//On ajoute l'evenement du click sur la description pour faire jouer la chanson
+				document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
+					playSong(song.objet);
 				}
-			}
-			
-			
-			//var chansonAjoutee = maPlayList[i].objet;
-			/*Evenement lorsque le bouton d'ajout de chanson est clique*/
-			document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
-				var nouvelleEntree = song;
-				//console.log(nouvelleEntree);
-				retirerChanson(nouvelleEntree);
-				e.preventDefault();
-				e.stopPropagation();
-			}
+				document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
+					retirerChanson(song);
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}			
 		});
 	}
 }
@@ -155,12 +159,11 @@ function getSpotifySongs()
 				songDiv.className = "song";
 				/*<div id=\"player\"><button id=\"player-play\">></button><button id=\"player-pause\">ll</button><div id=\"player-slider\"><div id=\"player-progress\" ><div id=\"player-progress-hand\"></div></div></div></div>*/
 				songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artists[0].name + ' - ' + song.name + "</p><button id=\"add-to-playList\">+</button></div></a></div>"			
-				musicTab.appendChild(songDiv);
-				
+				musicTab.appendChild(songDiv);	
+
 				var nouvelleEntree = {type: "spotify", objet: song};
 				/*Evenement lorsque le bouton d'ajout de chanson est clique*/
 				document.getElementById("musiqueTab").lastChild.lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
-					console.log(nouvelleEntree);
 					ajouterChanson(nouvelleEntree);
 					e.preventDefault();
 					e.stopPropagation();
@@ -346,7 +349,7 @@ function ajouterChanson(chanson)
 //Fonction permettant de retirer une chanson de notre PlayList
 function retirerChanson(chanson)
 {
-	console.log(chanson);
+	//console.log(chanson);
 	var myPlayListJson = localStorage.getItem("myPlayList");
 	var myPlayList = JSON.parse(myPlayListJson);
 	
@@ -358,8 +361,9 @@ function retirerChanson(chanson)
 			{
 				if(myPlayList[i].objet.name === chanson.objet.name)
 				{
-						console.log("FOUND SPOTIFY!");
+						//console.log("FOUND SPOTIFY!");
 						myPlayList.splice(i,1);
+						break;
 				}
 			}
 			else if(myPlayList[i].type == "deezer")
@@ -367,6 +371,7 @@ function retirerChanson(chanson)
 				if(myPlayList[i].objet.title === chanson.objet.title)
 				{
 					myPlayList.splice(i,1);
+					break;
 				}
 			}
 		}
