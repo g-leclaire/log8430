@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="canevas.css">
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	
+	<script src="musicScript.js"></script>
+</head>
+
+
+<body>
+
+<h1>Music Browsing 2.0</h1>
+
+<div>
+	<p>Rechercher :</p>
+	<input type="text" id="searchField" value="Jackson"></input>
+	<button id="OkButton">Ok</button>
+</div>
+
+<div id="login">
+	<p>Connectez vous a Spotify pour afficher les chansons de celui-ci</p>
+	<a href="/login" class="btn btn-primary">Log in with Spotify</a>
+</div>
+
+<div class="tab">
+	<button class="tablinks active" id="musicButton">Musique</button>
+	<button class="tablinks" id="playListButton">Rechercher PlayList</button>
+	<button class="tablinks" id="mesPlayListButton">Mes PlayList</button>
+</div>
+
+<div id="musiqueTab" class="tabcontent">
+
+</div>
+
+<div id="playListTab" class="tabcontent">
+
+</div>
+
+<div id="mesPlaylistTab" class="tabcontent">
+
+</div>
+
+
+</body>
+<div id="dz-root"></div>
+<script src="http://cdn-files.deezer.com/js/min/dz.js"></script>
+
+
+
+</html>

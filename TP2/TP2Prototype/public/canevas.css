@@ -1,0 +1,91 @@
+/*Tab*/
+div.tab {
+	overflow: hidden;
+	border: 1px solid #ccc;
+	background-color: #f1f1f1;
+}
+
+/*Boutons de la Tab*/
+div.tab button{
+	background-color: inherit;
+	float: left;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 14px 16px;
+	top : 15px;
+	transition: 0.3;
+}
+
+/*Tab Button hover*/
+div.tab button:hover{
+	background-color:#ddd;
+}
+
+/*Active tab*/
+div.tab button.active{
+	background-color: #ccc;
+}
+
+/*Tab Content*/
+.tabcontent{
+	display: none;
+	padding: 6px 12px;
+	border: 1px solid #ccc;
+	border-top: none;
+}
+
+/*Barre d'avancement de la chanson*/
+#player-slider {
+	display: inline-block;
+	background-color: LightGray;
+	width: 300px;
+	margin-left: 15px;
+}
+
+/*Rond d'avancement de la chanson*/
+#player-progress {
+	background-color: black;
+	height: 5px;
+	width: 0%;
+	position: relative;
+}
+
+/*Barre d'avancement de la chanson*/
+#player-progress-hand {
+	position: absolute;
+	background: rgb(130,130,130);
+	width: 10px;
+	height: 10px;
+	right: -5px;
+	border-radius: 5px;
+	bottom: -3px;
+}
+
+/*Logo des musiques*/
+.logo{
+	position:relative;
+	margin-left: 10px;
+	margin-top: 12px;
+	width:50px;
+	height:50px;
+}
+
+/*Description des chansons*/
+.musicDesc{
+	display:inline-block;
+}
+
+/*Liste des chansons*/
+.song{
+	height:80px;
+	border: 1px solid black;
+}
+
+/*Boutons*/
+.btn {
+	background-color: #eef3f0;
+	color: black;
+	border: 1px solid black;
+}
+
