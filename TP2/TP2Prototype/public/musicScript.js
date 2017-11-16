@@ -4,16 +4,36 @@ var access_token = null;
 refresh_token = null;
 error = null;
 
-/*class Song {
+class Song {
 	constructor() {
 		this.title = "";
         this.artist = "";
         this.year = "";
         this.id = "";
         this.href = "";
-        this.player = null;
+        this.imgSrc = "";
+        this.player = new Player();
 	}
-}*/
+
+    buildDiv() {
+        let songDiv = $("<div class=\"song\"><img src=\"" + this.imgSrc + "\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + this.artist + ' - ' + this.title + "</p><button id=\"add-to-playList\">+</button></div></div>");
+        songDiv.data("song", this);
+        songDiv.click(function (e) {
+            $(this).data("song").player.play();
+        });
+        return songDiv;
+    }
+
+	createFromDeezerJSONObject(songJSONObject) {
+        this.imgSrc = "https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg";
+	    this.title = songJSONObject.title;
+        this.artist = songJSONObject.artist.name;
+        this.year = null;
+        this.id = songJSONObject.id;
+        this.href = songJSONObject.link;
+        this.player = new DeezerPlayer(songJSONObject.id);
+    }
+}
 
 class Player {
     play() {
@@ -44,6 +64,7 @@ class SpotifyPlayer extends Player {
         window.open(this.songLink);
     }
 }
+
 
 
 /**
@@ -297,26 +318,19 @@ function getDeezerSongs()
 				href: song.link,
 				player: new DeezerPlayer(song.id)
 			}
-			
-			/*On ajoute la section dans l'affichage*/
-			var songDiv = document.createElement("div");
-			songDiv.className = "song";
-			/*<div id=\"player\"><button id=\"player-play\">></button><button id=\"player-pause\">ll</button><div id=\"player-slider\"><div id=\"player-progress\" ><div id=\"player-progress-hand\"></div></div></div></div>*/
-			songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist.name + ' - ' + song.title + "</p><button id=\"add-to-playList\">+</button></div></div>"
-			musicTab.appendChild(songDiv);
-			
-			//On ajoute les Bindings a cette chanson
-			/*DZ.Event.subscribe('player_position', function(e,i){
-				time_current = e[0];
-				if (e[1])
-					time_total = +e[1];
-				var width = (time_current / time_total * 100) + '%';
-				
-			});*/
-			/*Evenement lorsqu'une chanson est cliquee*/
-			document.getElementById("musiqueTab").lastChild.onclick = function(e){
-                formattedSong.player.play();
-			}
+
+
+			let newSong = new Song();
+			newSong.createFromDeezerJSONObject(song);
+
+			/*let newSongDiv = $("<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist.name + ' -test- ' + song.title + "</p><button id=\"add-to-playList\">+</button></div></div>");
+            newSongDiv.data("song", formattedSong);
+            newSongDiv.click(function (e) {
+                $(this).data("song").player.play();
+            });*/
+
+			$("#musiqueTab").append(newSong.buildDiv());
+
 			
 			var nouvelleEntree = {type: "deezer", objet: song};
 			/*Evenement lorsque le bouton d'ajout de chanson est clique*/
