@@ -28,10 +28,20 @@ class DeezerPlayer extends Player {
 	}
 
     play() {
-		//555640
-        DZ.player.playTracks([/*this.songId*/"555640"], 0, function(response){
+        DZ.player.playTracks([this.songId], 0, function(response){
             console.log("play reponse: ", response.tracks);
         });
+    }
+}
+
+class SpotifyPlayer extends Player {
+    constructor(songLink) {
+        super();
+        this.songLink = songLink;
+    }
+
+    play() {
+        window.open(this.songLink);
     }
 }
 
@@ -116,9 +126,14 @@ function afficherMaPlayList()
 			//Si le type de la chanson est un spotify
 			if(song.type == "spotify")
 			{
-				songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.objet.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artists[0].name + ' - ' + song.objet.name + "</p><button id=\"add-to-playList\">X</button></div></a></div>"						
+                song.objet.player = new SpotifyPlayer(song.objet.external_urls.spotify);
+				//songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.objet.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artists[0].name + ' - ' + song.objet.name + "</p><button id=\"add-to-playList\">X</button></div></a></div>"
+                songDiv.innerHTML = "<div class=\"song\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artists[0].name + ' - ' + song.objet.name + "</p><button id=\"add-to-playList\">X</button></div></div>"
 				myPlayListTab.appendChild(songDiv);
 				//On ajoute l'evenement lorsque le bouton de retrait est cliqué
+                document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
+                    song.objet.player.play();
+                }
 				document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
 					var nouvelleEntree = song;
 					retirerChanson(nouvelleEntree);
@@ -131,6 +146,9 @@ function afficherMaPlayList()
 			{
                 song.objet.player = new DeezerPlayer(song.objet.id);
 				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artist + ' - ' + song.objet.title + "</p><button id=\"add-to-playList\">X</button></div></div>"
+
+                //let newSongDiv = $("<p>##########</p>");
+                //$("mesPlaylistTab").append(newSongDiv);
 				myPlayListTab.appendChild(songDiv);
 				//On ajoute l'evenement du click sur la description pour faire jouer la chanson
 				document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
@@ -191,8 +209,13 @@ function getSpotifySongs()
 				var songDiv = document.createElement("div");
 				songDiv.className = "song";
 				/*<div id=\"player\"><button id=\"player-play\">></button><button id=\"player-pause\">ll</button><div id=\"player-slider\"><div id=\"player-progress\" ><div id=\"player-progress-hand\"></div></div></div></div>*/
-				songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artists[0].name + ' - ' + song.name + "</p><button id=\"add-to-playList\">+</button></div></a></div>"			
-				musicTab.appendChild(songDiv);	
+				songDiv.innerHTML = "<div class=\"song\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artists[0].name + ' - ' + song.name + "</p><button id=\"add-to-playList\">+</button></div></div>"
+				musicTab.appendChild(songDiv);
+
+                document.getElementById("musiqueTab").lastChild.onclick = function(e){
+                    let player = new SpotifyPlayer(song.external_urls.spotify);
+                	player.play();
+                }
 
 				var nouvelleEntree = {type: "spotify", objet: song};
 				/*Evenement lorsque le bouton d'ajout de chanson est clique*/
@@ -292,7 +315,6 @@ function getDeezerSongs()
 			});*/
 			/*Evenement lorsqu'une chanson est cliquee*/
 			document.getElementById("musiqueTab").lastChild.onclick = function(e){
-				//playSong(song);
                 formattedSong.player.play();
 			}
 			
