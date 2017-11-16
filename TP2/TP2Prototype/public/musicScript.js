@@ -1,5 +1,3 @@
-var time_current = 0.0;
-var time_total = 0.0;
 var access_token = null;
 refresh_token = null;
 error = null;
@@ -17,7 +15,7 @@ class Song {
 
     buildDiv(isPlaylist) {
 	    let playlistButtonLabel = isPlaylist ? "X" : "+";
-        let songDiv = $("<div class=\"song\"><img src=\"" + this.imgSrc + "\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + this.artist + ' - ' + this.title + "</p><button id=\"add-to-playList\">" + playlistButtonLabel + "</button></div></div>");
+        let songDiv = $("<div class=\"song\"><img src=\"" + this.imgSrc + "\" class=\"logo\" alt=\"logo\"></img><div class=\"musicDesc\"><p>" + this.artist + ' - ' + this.title + "</p><button id=\"add-to-playList\">" + playlistButtonLabel + "</button></div></div>");
         let song = this;
         songDiv.data("song", song);
 
@@ -28,7 +26,7 @@ class Song {
 
         // Add to playlist event
         songDiv.find("#add-to-playList").click(function (e) {
-            let playlistElement = {type: "deezer", objet: song.JSONObject};
+            let playlistElement = {type: song.type, objet: song.JSONObject};
             if (isPlaylist)
                 retirerChanson(playlistElement);
             else
@@ -38,15 +36,28 @@ class Song {
         return songDiv;
     }
 
-	createFromDeezerJSONObject(songJSONObject) {
-        this.JSONObject = songJSONObject;
-	    this.imgSrc = "https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg";
-	    this.title = songJSONObject.title;
-        this.artist = songJSONObject.artist.name;
-        this.year = null;
-        this.id = songJSONObject.id;
-        this.href = songJSONObject.link;
-        this.player = new DeezerPlayer(songJSONObject.id);
+	static createFromDeezerJSONObject(songJSONObject) {
+	    let song = new Song();
+        song.type = "deezer";
+        song.JSONObject = songJSONObject;
+	    song.imgSrc = "https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg";
+	    song.title = songJSONObject.title;
+        song.artist = songJSONObject.artist.name;
+        song.id = songJSONObject.id;
+        song.player = new DeezerPlayer(songJSONObject.id);
+        return song;
+    }
+
+    static createFromSpotifyJSONObject(songJSONObject) {
+	    let song = new Song();song
+        song.type = "spotify";
+        song.JSONObject = songJSONObject;
+        song.imgSrc = "http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg";
+        song.title = songJSONObject.name;
+        song.artist = songJSONObject.artists[0].name;
+        song.href = songJSONObject.external_urls.spotify;
+        song.player = new SpotifyPlayer(songJSONObject.external_urls.spotify);
+        return song;
     }
 }
 
@@ -111,8 +122,10 @@ function afficherMusique()
 		musicTab.removeChild(musicTab.firstChild);
 
     let searchEntry = document.getElementById("searchField").value;
-	//On va chercher les chansons a afficher de Deezer
+
+    //On va chercher les chansons a afficher de Deezer
 	launchDeezerSongsSearch(searchEntry);
+
 	//On va chercher les chansons a afficher de Spotify
 	launchSpotifySongsSearch(searchEntry);
 }
@@ -152,37 +165,12 @@ function afficherMaPlayList()
 	
 	if(maPlayList != null)
 	{
-		//for(var i = 0 ; i < maPlayList.length; i++)
-		maPlayList.slice().forEach(function(playlistElement)
+		maPlayList.forEach(function(playlistElement)
 		{
-			/*On ajoute la section dans l'affichage*/
-			var songDiv = document.createElement("div");
-			songDiv.className = "song";
-			
-			//Si le type de la chanson est un spotify
 			if(playlistElement.type == "spotify")
-			{
-                playlistElement.objet.player = new SpotifyPlayer(playlistElement.objet.external_urls.spotify);
-				//songDiv.innerHTML = "<div class=\"song\"><a href=\"" + song.objet.external_urls.spotify + "\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artists[0].name + ' - ' + song.objet.name + "</p><button id=\"add-to-playList\">X</button></div></a></div>"
-                songDiv.innerHTML = "<div class=\"song\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + playlistElement.objet.artists[0].name + ' - ' + playlistElement.objet.name + "</p><button id=\"add-to-playList\">X</button></div></div>"
-				myPlayListTab.appendChild(songDiv);
-				//On ajoute l'evenement lorsque le bouton de retrait est cliqué
-                document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
-                    playlistElement.objet.player.play();
-                }
-				document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
-					retirerChanson(playlistElement);
-					//On evite le comportement par defaut pour eviter une redirection de l'ancre (<a...>)
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			}
+                $("#mesPlaylistTab").append(Song.createFromSpotifyJSONObject(playlistElement.objet).buildDiv(true));
 			else if(playlistElement.type == "deezer")
-			{
-			    let song = new Song();
-			    song.createFromDeezerJSONObject(playlistElement.objet);
-                $("#mesPlaylistTab").append(song.buildDiv(true));
-			}			
+                $("#mesPlaylistTab").append(Song.createFromDeezerJSONObject(playlistElement.objet).buildDiv(true));
 		});
 	}
 }
@@ -214,37 +202,16 @@ function launchSpotifySongsSearch(searchEntry)
 	  access_token = data.access_token;
 	});
 
-	//On va chercher les chansons de Spotify
+	// On va chercher les chansons de Spotify
 	$.ajax({
 		url: 'https://api.spotify.com/v1/search?q=' + searchEntry + '&type=track&limit=10',
 		headers: {
 		  'Authorization': 'Bearer ' + access_token
 		},
 		success: function(response) {
-			var musicTab = document.getElementById("musiqueTab");
-			/*Pour chacun des resultats obtenus*/
-			//for(var i = 0 ; i < response.tracks.items.length; i++)
-			response.tracks.items.slice(0, 10).forEach(function(song)
-			{
-				/*On ajoute la section dans l'affichage*/
-				var songDiv = document.createElement("div");
-				songDiv.className = "song";
-				/*<div id=\"player\"><button id=\"player-play\">></button><button id=\"player-pause\">ll</button><div id=\"player-slider\"><div id=\"player-progress\" ><div id=\"player-progress-hand\"></div></div></div></div>*/
-				songDiv.innerHTML = "<div class=\"song\"><img src=\"http://pixel.nymag.com/imgs/daily/vulture/2015/06/26/26-spotify.w529.h529.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artists[0].name + ' - ' + song.name + "</p><button id=\"add-to-playList\">+</button></div></div>"
-				musicTab.appendChild(songDiv);
-
-                document.getElementById("musiqueTab").lastChild.onclick = function(e){
-                    let player = new SpotifyPlayer(song.external_urls.spotify);
-                	player.play();
-                }
-
-				var nouvelleEntree = {type: "spotify", objet: song};
-				/*Evenement lorsque le bouton d'ajout de chanson est clique*/
-				document.getElementById("musiqueTab").lastChild.lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
-					ajouterChanson(nouvelleEntree);
-					e.preventDefault();
-					e.stopPropagation();
-				}
+			// On prend les 10 premiers resultats
+			response.tracks.items.slice(0, 10).forEach(function(songJSONObject) {
+                $("#musiqueTab").append(Song.createFromSpotifyJSONObject(songJSONObject).buildDiv(false));
 			});
 		}
 	})
@@ -302,9 +269,7 @@ function launchDeezerSongsSearch(searchEntry)
 	DZ.api('/search/' + "track" + '?q=' + encodeURIComponent(searchEntry), function(response){
 		/*On selectionne les 10 premiers resultats*/
 		response.data.slice(0, 10).forEach(function(songJSONObject) {
-			let song = new Song();
-			song.createFromDeezerJSONObject(songJSONObject);
-			$("#musiqueTab").append(song.buildDiv());
+			$("#musiqueTab").append(Song.createFromDeezerJSONObject(songJSONObject).buildDiv(false));
 		});
 	});
 }
@@ -419,34 +384,12 @@ function retirerChanson(chanson)
 	
 }
 
-//Fonction permettant de faire jouer une chanson
-var playSong = function(song) {
-	//song.player.play();
-	DZ.player.playTracks([song.id], 0, function(response){
-		console.log("play reponse: ", response.tracks);
-	});
-};
-
 var playAlbum = function(album) {
 	console.log(album);
 	DZ.player.playAlbum(album.id, 0, function(response){
 		console.log("track list", response.tracks);
 	});
 }
-
-/*
-var stopSong = function() {
-	DZ.player.pause
-}
-
-
-var sliderClicked = function(e) {
-	var slider = $(e.delegateTarget);
-	var x = e.clientX - slider.offset().left;
-	DZ.player.seek(x / slider.width() * 100);	
-	
-};
-*/
 
 //Fonction appellée à l'ouverture de la page
 $(document).ready(function(){
