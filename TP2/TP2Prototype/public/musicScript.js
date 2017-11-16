@@ -627,7 +627,7 @@ function getJamendoSongs()
                                 .append($('<audio controls></audio>')
                                     .append('<source>').attr('src', song.audio).prop('type', 'audio/mpeg')
                                 )
-                                .append('<a href="' + song.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Jamendo</a>')
+                                .append('<a href="' + song.shareurl + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Jamendo</a>')
                             )
                             .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist)))
                 }

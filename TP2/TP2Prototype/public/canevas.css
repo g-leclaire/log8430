@@ -73,13 +73,14 @@ div.tab
     table-layout  : fixed;
     margin-top    : 50px;
     margin-bottom : 30px;
+    background: transparent;
 }
 
 /*Boutons de la Tab*/
 div.tab button
 {
     display        : table-cell;
-    width          : 50%;
+    width          : 49%;
     border         : none;
     font-size      : 15px;
     text-transform : uppercase;
@@ -87,24 +88,26 @@ div.tab button
     letter-spacing : 1px;
     cursor         : pointer;
     transition     : 0.2s;
+    background: transparent;
+    overflow: hidden;
 }
 
 #playlists
 {
     
-border-bottom : solid 1px #EEEEEE;
+    border-bottom : solid 1px #EEEEEE;
     
-padding       : 10px;
+    padding       : 10px;
     
-background    : linear-gradient(to right, #F9F7F7, #FDFDFD);
+    background    : linear-gradient(to right, #F9F7F7, #FDFDFD);
     
-height: 125px;
+    height: 125px;
     
-overflow: hidden;
+    overflow: hidden;
     
-white-space: nowrap;
+    white-space: nowrap;
     
-overflow-x: scroll;
+    overflow-x: scroll;
 }
 
 #playlist-label
@@ -122,30 +125,30 @@ overflow-x: scroll;
 #playlists button
 {
     
-background    : linear-gradient(to left, #2183E4, #4FA8FF);
+    background    : linear-gradient(to left, #2183E4, #4FA8FF);
     
     transition:1s;
-color         : white;
+    color         : white;
     
-border-radius : 20px;
+    border-radius : 20px;
     
-line-height   : 100px;
+    line-height   : 100px;
     
-padding       : 0 20px;
+    padding       : 0 20px;
     
-border        : none;
+    border        : none;
     
-position      : relative;
+    position      : relative;
     
-padding-right : 50px;
+    padding-right : 50px;
     
-margin        : 0 10px;
+    margin        : 0 10px;
     
-box-shadow    : 1px 1px 1px #00000026;
+    box-shadow    : 1px 1px 1px #00000026;
     
-font-weight   : 100;
+    font-weight   : 100;
     
-cursor: pointer;
+    cursor: pointer;
 }
 
 #playlists button span
@@ -271,14 +274,22 @@ input::placeholder
 
 #create-playlist-form input
 {
-    width         : 100%;
-    line-height   : 42px;
-    box-shadow    : 1px 1px 6px 0px #00000038;
-    border        : none;
-    margin-bottom : 20px;
-    padding-left  : 10px;
-    box-shadow: 1px 5px 7px 2px #0000002B;
-    border-radius: 2px;
+    
+    width         : 100%;
+    
+    line-height   : 42px;
+    
+    box-shadow    : 1px 1px 6px 0px #00000038;
+    
+    border        : none;
+    
+    margin-bottom : 20px;
+    
+    padding-left  : 10px;
+    
+    box-shadow: 1px 5px 7px 2px #0000002B;
+    
+    border-radius: 2px;
 }
 
 .playlist-cta #create-playlist
@@ -376,25 +387,25 @@ input::placeholder
 #choose-playlist
 {
     
-position      : absolute;
+    position      : absolute;
     
-top           : 70px;
+    top           : 70px;
     
-right         : 0;
+    right         : 0;
     
-background    : white;
+    background    : white;
     
-box-shadow    : 1px 1px 1px 1px #EEEEEE;
+    box-shadow    : 1px 1px 1px 1px #EEEEEE;
     
-padding       : 10px;
+    padding       : 10px;
     
-border-radius : 2px;
+    border-radius : 2px;
     
-background    : #2183E4;
+    background    : #2183E4;
     
-color         : white;
+    color         : white;
     
-z-index: 10;
+    z-index: 10;
 }
 
 #choose-playlist label
@@ -629,3 +640,4 @@ button.addToPlaylist
     margin         : 10px;
     vertical-align : middle;
     box-shadow     : 1px 1px 1px 1px #00000026;
+}
