@@ -17,15 +17,26 @@ class Song {
 
     buildDiv() {
         let songDiv = $("<div class=\"song\"><img src=\"" + this.imgSrc + "\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + this.artist + ' - ' + this.title + "</p><button id=\"add-to-playList\">+</button></div></div>");
-        songDiv.data("song", this);
-        songDiv.click(function (e) {
-            $(this).data("song").player.play();
+        let song = this;
+        songDiv.data("song", song);
+
+        // Play event
+        songDiv.find("p").click(function (e) {
+            song.player.play();
         });
+
+        // Add to playlist event
+        songDiv.find("#add-to-playList").click(function (e) {
+            let nouvelleEntree = {type: "deezer", objet: song.JSONObject};
+            ajouterChanson(nouvelleEntree);
+        });
+
         return songDiv;
     }
 
 	createFromDeezerJSONObject(songJSONObject) {
-        this.imgSrc = "https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg";
+        this.JSONObject = songJSONObject;
+	    this.imgSrc = "https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg";
 	    this.title = songJSONObject.title;
         this.artist = songJSONObject.artist.name;
         this.year = null;
@@ -94,12 +105,12 @@ function afficherMusique()
 	//On vide la liste de chansons
 	while(musicTab.firstChild)
 		musicTab.removeChild(musicTab.firstChild);
-	
+
+    let searchEntry = document.getElementById("searchField").value;
 	//On va chercher les chansons a afficher de Deezer
-	getDeezerSongs();
-	
+	launchDeezerSongsSearch(searchEntry);
 	//On va chercher les chansons a afficher de Spotify
-	getSpotifySongs();
+	launchSpotifySongsSearch(searchEntry);
 }
 
 //Fonction affichant le contenu de la tab Recherche PlayList
@@ -166,10 +177,8 @@ function afficherMaPlayList()
 			else if(song.type == "deezer")
 			{
                 song.objet.player = new DeezerPlayer(song.objet.id);
-				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artist + ' - ' + song.objet.title + "</p><button id=\"add-to-playList\">X</button></div></div>"
+				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artist.name + ' - ' + song.objet.title + "</p><button id=\"add-to-playList\">X</button></div></div>"
 
-                //let newSongDiv = $("<p>##########</p>");
-                //$("mesPlaylistTab").append(newSongDiv);
 				myPlayListTab.appendChild(songDiv);
 				//On ajoute l'evenement du click sur la description pour faire jouer la chanson
 				document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
@@ -192,7 +201,7 @@ function cacherTabs()
 	allTabs.hide();
 }
 
-function getSpotifySongs()
+function launchSpotifySongsSearch(searchEntry)
 {
 	/*On va chercher les parametres de l'URL*/
 	var params = getHashParams();
@@ -211,9 +220,7 @@ function getSpotifySongs()
 	}).done(function(data) {
 	  access_token = data.access_token;
 	});
-	
-	/*On va chercher la valeur de la recherche*/
-	var searchEntry = document.getElementById("searchField").value;
+
 	//On va chercher les chansons de Spotify
 	$.ajax({
 		url: 'https://api.spotify.com/v1/search?q=' + searchEntry + '&type=track&limit=10',
@@ -294,60 +301,19 @@ function getSpotifyPlayLists()
 	})
 }
 
-function getDeezerSongs()
+function launchDeezerSongsSearch(searchEntry)
 {
-	var songs = [];
-	//On va chercher la valeur de recherche
-	var searchEntry = document.getElementById("searchField").value;
-	//Si on n'a pas de valeur de recherche, alors on ne prend aucune chanson
-	if(searchEntry == "")
-		return [];
+	// Si on n'a pas de valeur de recherche, alors on ne prend aucune chanson
+	if(searchEntry == "") return;
 	/*Allons chercher les chansons a afficher*/
 	DZ.api('/search/' + "track" + '?q=' + encodeURIComponent(searchEntry), function(response){
 		/*On selectionne les 10 premiers resultats*/
-		var musicTab = document.getElementById("musiqueTab");
-		var i = 0;
-		console.log(response);
-		response.data.slice(0, 10).forEach(function(song) {
-			i++;
-			var formattedSong = {
-				title: song.title,
-				artist: song.artist.name,
-				year: null,
-				id: song.id,
-				href: song.link,
-				player: new DeezerPlayer(song.id)
-			}
-
-
-			let newSong = new Song();
-			newSong.createFromDeezerJSONObject(song);
-
-			/*let newSongDiv = $("<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist.name + ' -test- ' + song.title + "</p><button id=\"add-to-playList\">+</button></div></div>");
-            newSongDiv.data("song", formattedSong);
-            newSongDiv.click(function (e) {
-                $(this).data("song").player.play();
-            });*/
-
-			$("#musiqueTab").append(newSong.buildDiv());
-
-			
-			var nouvelleEntree = {type: "deezer", objet: song};
-			/*Evenement lorsque le bouton d'ajout de chanson est clique*/
-			document.getElementById("musiqueTab").lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
-				console.log(nouvelleEntree);
-				ajouterChanson(nouvelleEntree);
-				e.stopPropagation();
-			}
-
-			//musicTab.getElementById("player-play").onclick = playSong(song);
-			//$("#player-pause").click(DZ.player.pause);
-			//$("#player-slider").click(sliderClicked);
-			
-			songs.push(formattedSong);
+		response.data.slice(0, 10).forEach(function(songJSONObject) {
+			let song = new Song();
+			song.createFromDeezerJSONObject(songJSONObject);
+			$("#musiqueTab").append(song.buildDiv());
 		});
 	});
-	return songs;
 }
 
 function getDeezerPlayLists()
