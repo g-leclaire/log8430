@@ -4,7 +4,7 @@ var access_token = null;
 refresh_token = null;
 error = null;
 
-class Song {
+/*class Song {
 	constructor() {
 		this.title = "";
         this.artist = "";
@@ -13,7 +13,7 @@ class Song {
         this.href = "";
         this.player = null;
 	}
-}
+}*/
 
 class Player {
     play() {
@@ -29,7 +29,7 @@ class DeezerPlayer extends Player {
 
     play() {
 		//555640
-        DZ.player.playTracks([this.songId], 0, function(response){
+        DZ.player.playTracks([/*this.songId*/"555640"], 0, function(response){
             console.log("play reponse: ", response.tracks);
         });
     }
@@ -129,11 +129,12 @@ function afficherMaPlayList()
 			}
 			else if(song.type == "deezer")
 			{
-				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist + ' - ' + song.title + "</p><button id=\"add-to-playList\">X</button></div></div>"
+                song.objet.player = new DeezerPlayer(song.objet.id);
+				songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.objet.artist + ' - ' + song.objet.title + "</p><button id=\"add-to-playList\">X</button></div></div>"
 				myPlayListTab.appendChild(songDiv);
 				//On ajoute l'evenement du click sur la description pour faire jouer la chanson
 				document.getElementById("mesPlaylistTab").lastChild.lastChild.onclick = function(e){
-					playSong(song.objet);
+                    song.objet.player.play();
 				}
 				document.getElementById("mesPlaylistTab").lastChild.lastChild.lastChild.lastChild.onclick = function(e) {
 					retirerChanson(song);
@@ -263,22 +264,22 @@ function getDeezerSongs()
 		var musicTab = document.getElementById("musiqueTab");
 		var i = 0;
 		console.log(response);
-		response.data.slice(0, 10).forEach(function(foundSong) {
+		response.data.slice(0, 10).forEach(function(song) {
 			i++;
-
-			let song = new Song();
-            song.title = foundSong.title;
-            song.artist = foundSong.artist.name;
-            song.year = null;
-            song.id = foundSong.id;
-            song.href = foundSong.link;
-            song.player = new DeezerPlayer(foundSong.id);
+			var formattedSong = {
+				title: song.title,
+				artist: song.artist.name,
+				year: null,
+				id: song.id,
+				href: song.link,
+				player: new DeezerPlayer(song.id)
+			}
 			
 			/*On ajoute la section dans l'affichage*/
 			var songDiv = document.createElement("div");
 			songDiv.className = "song";
 			/*<div id=\"player\"><button id=\"player-play\">></button><button id=\"player-pause\">ll</button><div id=\"player-slider\"><div id=\"player-progress\" ><div id=\"player-progress-hand\"></div></div></div></div>*/
-			songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist + ' - ' + song.title + "</p><button id=\"add-to-playList\">+</button></div></div>"
+			songDiv.innerHTML = "<div class=\"song\"><img src=\"https://e-cdns-files.dzcdn.net/img/common/ogdeezer.jpg\" class=\"logo\" alt=\"deezerLogo\"></img><div class=\"musicDesc\"><p>" + song.artist.name + ' - ' + song.title + "</p><button id=\"add-to-playList\">+</button></div></div>"
 			musicTab.appendChild(songDiv);
 			
 			//On ajoute les Bindings a cette chanson
@@ -289,9 +290,10 @@ function getDeezerSongs()
 				var width = (time_current / time_total * 100) + '%';
 				
 			});*/
-			// Evenement lorsqu'une chanson est cliquee
+			/*Evenement lorsqu'une chanson est cliquee*/
 			document.getElementById("musiqueTab").lastChild.onclick = function(e){
-                song.player.play();
+				//playSong(song);
+                formattedSong.player.play();
 			}
 			
 			var nouvelleEntree = {type: "deezer", objet: song};
@@ -306,7 +308,7 @@ function getDeezerSongs()
 			//$("#player-pause").click(DZ.player.pause);
 			//$("#player-slider").click(sliderClicked);
 			
-			songs.push(song);
+			songs.push(formattedSong);
 		});
 	});
 	return songs;
@@ -424,10 +426,10 @@ function retirerChanson(chanson)
 
 //Fonction permettant de faire jouer une chanson
 var playSong = function(song) {
-	song.player.play();
-	/*DZ.player.playTracks([song.id], 0, function(response){
+	//song.player.play();
+	DZ.player.playTracks([song.id], 0, function(response){
 		console.log("play reponse: ", response.tracks);
-	});*/
+	});
 };
 
 var playAlbum = function(album) {
