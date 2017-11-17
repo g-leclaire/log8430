@@ -1,3 +1,11 @@
+// Define jQuery for jest tests
+if (typeof require !== "undefined") {
+    var $ = require('jquery');
+}
+
+// Variable to be exported for jest tests
+var musicScript = {};
+
 var access_token = null;
 refresh_token = null;
 error = null;
@@ -165,7 +173,6 @@ function addToPlaylist()
             }
 
             mus.push(obj);
-
 
 
             localStorage.setItem('playlist_musics',JSON.stringify(mus));
@@ -511,29 +518,39 @@ function getJamendoSongs()
 function getDeezerSongs()
 {
     DZ.api('/search/' + "track" + '?q=' + encodeURIComponent($('#searchField')), function (response) {
-        var result = response.data;
-
-        result.forEach(function (song) {
-            $('#musiqueTab').append(
-                $('<div></div>')
-                    .addClass('song jamendo-song')
-                    .append(
-                        $('<img>')
-                            .attr('src', song.album.cover_small))
-                    .append(
-                        $('<div></div>').addClass('musicDesc')
-                            .append($('<span ></span>').addClass('deezer-tag').html('deezer'))
-                            .append($('<p></p>').addClass('title').text(song.title))
-                            .append($('<p></p>').addClass('artist').text(song.artist.name))
-                    )
-                    .append($('<div></div>').addClass('music-player')
-                        .append('<label>Preview:</label>')
-                        .append($('<audio controls></audio>')
-                            .append('<source>').attr('src', song.preview).prop('type', 'audio/mpeg')
-                        )
-                        .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Deezer</a>')
-                    )
-                    .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist)))
-        });
+        musicScript.appendDeezerSongs(response.data);
     });
+}
+
+musicScript.appendDeezerSongs = function(songs) {
+    songs.forEach(function (song) {
+        $('#musiqueTab').append(musicScript.generateDeezerSongHtml(song));
+    });
+}
+
+musicScript.generateDeezerSongHtml = function(song) {
+    return $('<div></div>')
+        .addClass('song jamendo-song')
+        .append(
+            $('<img>')
+                .attr('src', song.album.cover_small))
+        .append(
+            $('<div></div>').addClass('musicDesc')
+                .append($('<span ></span>').addClass('deezer-tag').html('deezer'))
+                .append($('<p></p>').addClass('title').text(song.title))
+                .append($('<p></p>').addClass('artist').text(song.artist.name))
+        )
+        .append($('<div></div>').addClass('music-player')
+            .append('<label>Preview:</label>')
+            .append($('<audio controls></audio>')
+                .append('<source>').attr('src', song.preview).prop('type', 'audio/mpeg')
+            )
+            .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Deezer</a>')
+        )
+        .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
+}
+
+// Module export for jest tests
+if (typeof module !== 'undefined') {
+    module.exports = musicScript;
 }
