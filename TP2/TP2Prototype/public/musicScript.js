@@ -447,29 +447,7 @@ function getSpotifySongs()
 
             var results = response.tracks.items;
             results.forEach(function (song) {
-                $('#musiqueTab').append(
-                    $('<div></div>')
-                        .addClass('song jamendo-song')
-                        .append(
-                            $('<img>')
-                                .attr('src', song.album.images[1].url))
-                        .append(
-                            $('<div></div>').addClass('musicDesc')
-                                .append($('<span ></span>').addClass('spotify-tag').html('spotify'))
-                                .append($('<p></p>').addClass('title').text(song.name))
-                                .append($('<p></p>').addClass('artist').text(song.artists[0].name))
-                        )
-
-                        .append($('<div></div>').addClass('music-player')
-                            .append('<label>Preview:</label>')
-                            .append($('<audio controls></audio>')
-                                .append('<source>').attr('src', song.preview_url).prop('type', 'audio/mpeg')
-                            )
-                            .append('<a href="' + song.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i> Full song on Spotify</a>')
-                        )
-
-                        .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
-                )
+                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song)));
             });
             sort();// Sort all elements;
         }
@@ -519,6 +497,18 @@ musicScript.generateSongHtml = function(song) {
             .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.service + '</a>')
         )
         .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
+}
+
+
+musicScript.formatSpotifySong = function(song) {
+    return {
+        title: song.name,
+        artist: song.artists[0].name,
+        cover: song.album.images[1].url,
+        preview: song.preview_url,
+        link: song.href,
+        service: "spotify"
+    };
 }
 
 
