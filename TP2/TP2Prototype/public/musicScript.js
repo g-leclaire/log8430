@@ -482,73 +482,69 @@ function getJamendoSongs()
     $.getJSON(
         "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI($('#searchField').val())
         , function (data) {
-
-            var results = data.results;
-            results.forEach(function (song) {
-                //console.log(song);
-                    $('#musiqueTab').append(
-                        $('<div></div>')
-                            .addClass('song jamendo-song')
-                            .append(
-                                $('<img>')
-                                    .attr('src', song.album_image))
-                            .append(
-                                $('<div></div>').addClass('musicDesc')
-                                    .append($('<span ></span>').addClass('jamendo-tag').html('jamendo'))
-                                    .append($('<p></p>').addClass('title').text(song.name))
-                                    .append($('<p></p>').addClass('artist').text(song.artist_name))
-                            )
-                            .append($('<div></div>').addClass('music-player')
-                                .append('<label>Preview:</label>')
-                                .append($('<audio controls></audio>')
-                                    .append('<source>').attr('src', song.audio).prop('type', 'audio/mpeg')
-                                )
-                                .append('<a href="' + song.shareurl + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Jamendo</a>')
-                            )
-                            .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist)))
-                }
-            )
-            ;
+            data.results.forEach(function (song) {
+                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song)));
+            });
             sort();// Sort all elements;
         })
-
 }
 
 
 function getDeezerSongs()
 {
     DZ.api('/search/' + "track" + '?q=' + encodeURIComponent($('#searchField')), function (response) {
-        musicScript.appendDeezerSongs(response.data);
+        response.data.forEach(function (song) {
+            $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song)));
+        });
     });
 }
 
-musicScript.appendDeezerSongs = function(songs) {
-    songs.forEach(function (song) {
-        $('#musiqueTab').append(musicScript.generateDeezerSongHtml(song));
-    });
-}
-
-musicScript.generateDeezerSongHtml = function(song) {
+musicScript.generateSongHtml = function(song) {
     return $('<div></div>')
         .addClass('song jamendo-song')
         .append(
             $('<img>')
-                .attr('src', song.album.cover_small))
+                .attr('src', song.cover))
         .append(
             $('<div></div>').addClass('musicDesc')
-                .append($('<span ></span>').addClass('deezer-tag').html('deezer'))
+                .append($('<span ></span>').addClass(song.service + '-tag').html(song.service))
                 .append($('<p></p>').addClass('title').text(song.title))
-                .append($('<p></p>').addClass('artist').text(song.artist.name))
+                .append($('<p></p>').addClass('artist').text(song.artist))
         )
         .append($('<div></div>').addClass('music-player')
             .append('<label>Preview:</label>')
             .append($('<audio controls></audio>')
                 .append('<source>').attr('src', song.preview).prop('type', 'audio/mpeg')
             )
-            .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on Deezer</a>')
+            .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.service + '</a>')
         )
         .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
 }
+
+
+musicScript.formatJamendoSong = function(song) {
+    return {
+        title: song.name,
+        artist: song.artist_name,
+        cover: song.album_image,
+        preview: song.audio,
+        link: song.shareurl,
+        service: "jamendo"
+    };
+}
+
+
+musicScript.formatDeezerSong = function(song) {
+    return {
+        title: song.title,
+        artist: song.artist.name,
+        cover: song.album.cover_small,
+        preview: song.preview,
+        link: song.link,
+        service: "deezer"
+    };
+}
+
 
 // Module export for jest tests
 if (typeof module !== 'undefined') {
