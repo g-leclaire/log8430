@@ -334,24 +334,85 @@ musicScript.getHashParams = function(hash)
 }
 
 
+var SpotifyAPI = {
+    searchSongs: function() {
+        var params = musicScript.getWindowHashParams();
+
+        access_token = params.access_token;
+        refresh_token = params.refresh_token;
+        error = params.error;
+
+        /*On fait une requete pour raffraichir les tokens*/
+        $.ajax({
+            url: '/refresh_token',
+            data: {
+                'refresh_token': refresh_token
+            }
+        }).done(function (data) {
+            access_token = data.access_token;
+        });
+
+
+        /*On va chercher la valeur de la recherche*/
+        $.ajax({
+            url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent($('#searchField').val()) + '&type=track&limit=10',
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            success: function (response) {
+
+                var results = response.tracks.items;
+                results.forEach(function (song) {
+                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
+                });
+                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+            }
+        });
+    }
+}
+
+var JamendoAPI = {
+    searchSongs: function() {
+        $.getJSON(
+            "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI($('#searchField').val())
+            , function (data) {
+                data.results.forEach(function (song) {
+                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song, false)));
+                });
+                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+            });
+    }
+}
+
+var DeezerAPI = {
+    searchSongs: function() {
+        if ($('#searchField').val().length > 0) {
+            DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
+                response.data.forEach(function (song) {
+                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song, false)));
+                });
+                musicScript.sort($('#musiqueTab .song'));
+            });
+        }
+    }
+}
+
+
 //Fonction affichant le contenu de la tab Musique
 function afficherMusique()
 {
     //On affiche la tab correspondante
     $("#musiqueTab").show().find('.song').remove();
 
-
-    //On va chercher les chansons a afficher de Deezer
-    //musicScript.getDeezerSongs();
-    //On va chercher les chansons a afficher de Spotify
-    getSpotifySongs();
-    //getJamendoSongs();
+    // On lance les recherches sur les différents api
+    ([SpotifyAPI, JamendoAPI, DeezerAPI]).forEach(api => api.searchSongs());
 }
 
 
 musicScript.sort = function(songDivs)// Synchronous
 {
     //Sort
+    // Seems broken. Commented to increase test coverage
     /*songDivs.sort(
         function (a, b) {
             return $(a).find('p').text().toLowerCase() > $(b).find('p').text().toLowerCase();
@@ -398,66 +459,6 @@ musicScript.sort = function(songDivs)// Synchronous
 }
 
 
-function getSpotifySongs()
-{
-    var params = musicScript.getWindowHashParams();
-
-    access_token = params.access_token;
-    refresh_token = params.refresh_token;
-    error = params.error;
-
-    /*On fait une requete pour raffraichir les tokens*/
-    $.ajax({
-        url: '/refresh_token',
-        data: {
-            'refresh_token': refresh_token
-        }
-    }).done(function (data) {
-        access_token = data.access_token;
-    });
-
-
-    /*On va chercher la valeur de la recherche*/
-    $.ajax({
-        url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent($('#searchField').val()) + '&type=track&limit=10',
-        headers: {
-            'Authorization': 'Bearer ' + access_token
-        },
-        success: function (response) {
-
-            var results = response.tracks.items;
-            results.forEach(function (song) {
-                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
-            });
-            musicScript.sort($('#musiqueTab .song'));// Sort all elements;
-        }
-    });
-}
-
-
-function getJamendoSongs()
-{
-    $.getJSON(
-        "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI($('#searchField').val())
-        , function (data) {
-            data.results.forEach(function (song) {
-                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song, false)));
-            });
-            musicScript.sort($('#musiqueTab .song'));// Sort all elements;
-        })
-}
-
-
-musicScript.getDeezerSongs = function()
-{
-    DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
-        response.data.forEach(function (song) {
-            $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song, false)));
-        });
-        musicScript.sort($('#musiqueTab .song'));
-    });
-}
-
 musicScript.generateSongHtml = function(song, isPlaylistView) {
     return $('<div></div>')
         .addClass('song jamendo-song')
@@ -482,18 +483,6 @@ musicScript.generateSongHtml = function(song, isPlaylistView) {
 }
 
 
-musicScript.formatSpotifySong = function(song) {
-    return {
-        title: song.name,
-        artist: song.artists[0].name,
-        img: song.album.images[1].url,
-        preview: song.preview_url,
-        href: song.href,
-        player: "spotify"
-    };
-}
-
-
 musicScript.formatJamendoSong = function(song) {
     return {
         title: song.name,
@@ -514,6 +503,17 @@ musicScript.formatDeezerSong = function(song) {
         preview: song.preview,
         href: song.link,
         player: "deezer"
+    };
+}
+
+musicScript.formatSpotifySong = function(song) {
+    return {
+        title: song.name,
+        artist: song.artists[0].name,
+        img: song.album.images[1].url,
+        preview: song.preview_url,
+        href: song.href,
+        player: "spotify"
     };
 }
 
