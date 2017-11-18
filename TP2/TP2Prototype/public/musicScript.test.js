@@ -112,7 +112,7 @@ test('updatePlaylists', () => {
 
 test('addToPlaylist', () => {
   songHtml = musicScript.generateSongHtml(formattedSong, true);
-  
+
   expect(musicScript.addToPlaylist(songHtml).find("#choose-playlist").length).toBe(1);
 });
 
@@ -123,4 +123,17 @@ test('choosePlaylist', () => {
 
   expect(newStoredSongs.length).toBe(2);
   expect(newStoredSongs[1].playlist_name).toBe("MaPlaylist");
+});
+
+test('createPlaylist', () => {
+  var form = $('<form id="create-playlist-form"><input name="playlist-name" placeholder="Enter a cool name for your playlist..." required><button id="create-playlist" type="submit"><i class="fa fa-plus-circle"></i> create playlist</button></form>');
+  musicScript.createPlaylist(form, "NewPlaylist");
+  var newPlaylists = JSON.parse(localStorage.getItem("playlists"));
+
+  expect(newPlaylists.length).toBe(2);
+  expect(newPlaylists[0]).toBe("NewPlaylist");
+
+  musicScript.createPlaylist(form, "NewPlaylist");
+
+  expect(newPlaylists.length).toBe(2);
 });

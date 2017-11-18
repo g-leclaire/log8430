@@ -60,40 +60,40 @@ $(document).ready(function () {
     // Create playlist
     $('#create-playlist-form').on('submit', function (e) {
         e.preventDefault();
-
-
-        var val = $('input[name=playlist-name]').val();
-
-        var playlists = localStorage.getItem('playlists');
-        if (!playlists)
-        {
-            playlists = [];
-        }
-        else
-        {
-            playlists = JSON.parse(localStorage.getItem('playlists'));
-        }
-
-        if ($.inArray(val, playlists) != -1)
-        {
-            alert('playlist name already taken');
-        }
-        else
-        {
-            playlists.unshift(val);
-
-            localStorage.setItem('playlists', JSON.stringify(playlists));
-            //console.log(playlists);
-        }
-        $(this)[0].reset();
-        musicScript.updatePlaylists();
-
+        musicScript.createPlaylist($(this), $('input[name=playlist-name]').val());
     });
 
     musicScript.updatePlaylists();
 });
 
- musicScript.addToPlaylist = function(songDiv)
+musicScript.createPlaylist = function(form, playlistName) {
+    var playlists = localStorage.getItem('playlists');
+    if (!playlists)
+    {
+        playlists = [];
+    }
+    else
+    {
+        playlists = JSON.parse(localStorage.getItem('playlists'));
+    }
+
+    if ($.inArray(playlistName, playlists) != -1)
+    {
+        alert('playlist name already taken');
+    }
+    else
+    {
+        playlists.unshift(playlistName);
+
+        localStorage.setItem('playlists', JSON.stringify(playlists));
+        //console.log(playlists);
+    }
+    form[0].reset();
+    musicScript.updatePlaylists();
+}
+
+
+musicScript.addToPlaylist = function(songDiv)
 {
     var playlists=localStorage.getItem('playlists');
 
