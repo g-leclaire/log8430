@@ -86,11 +86,11 @@ $(document).ready(function () {
             //console.log(playlists);
         }
         $(this)[0].reset();
-        updatePlaylists();
+        musicScript.updatePlaylists();
 
     });
 
-    updatePlaylists();
+    musicScript.updatePlaylists();
 });
 
 function addToPlaylist()
@@ -176,7 +176,7 @@ function addToPlaylist()
 
 
             localStorage.setItem('playlist_musics',JSON.stringify(mus));
-            updatePlaylists();
+            musicScript.updatePlaylists();
 
         }));
     });
@@ -184,7 +184,7 @@ function addToPlaylist()
 }
 
 
-function updatePlaylists()
+musicScript.updatePlaylists = function()
 {
     var playlists = localStorage.getItem('playlists');
     if (!playlists)
@@ -256,7 +256,7 @@ function removeFromPlaylist(song)
     var playlists = localStorage.getItem('playlist_musics');
     playlists = musicScript.removeFromPlaylistItem(song, playlists);
     localStorage.setItem('playlist_musics', playlists);
-    updatePlaylists();
+    musicScript.updatePlaylists();
 }
 
 
@@ -315,7 +315,7 @@ function removePlaylist(el)
     }
 
     localStorage.setItem('playlists', JSON.stringify(playlists));
-    updatePlaylists();
+    musicScript.updatePlaylists();
 }
 
 musicScript.getWindowHashParams = function() {
