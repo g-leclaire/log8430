@@ -115,69 +115,66 @@ $(document).ready(function () {
 
     playlists.forEach(function(item)
     {
-        $('#choose-playlist').append($('<button></button>').html(item).on('click',function()
-        {
-            //Gather all the information  needed
-
-            var song=$(this).closest('.song');
-
-
-            song.find('.addToPlaylist').remove();
-            song.append($('<div></div>').addClass('playlist-name').html($(this).html()));
-            $('#choose-playlist').remove();
-
-            var obj=
-                {
-                    'playlist_name':$(this).html(),
-                    'img': song.children('img').attr('src'),
-                    'player': song.find('.musicDesc').children('span').html(),
-                    'title': song.find('.musicDesc').find('.title').html(),
-                    'artist': song.find('.musicDesc').find('.artist').html(),
-                    'preview': song.find('.music-player').find('audio').attr('src'),
-                    'href': song.find('.music-player').find('a').attr('href')
-                };
-
-
-            var mus=localStorage.getItem('playlist_musics');
-
-
-            if (!mus)
-            {
-                mus = [];
-            }
-            else
-            {
-                mus = JSON.parse(mus);
-
-            }
-
-
-            var cont=true;
-
-
-            $.each(mus, function(i){
-                if(mus[i].title === obj.title) {
-                    cont=false;
-                    alert('music already exist');
-
-                    return ;
-                }
-            });
-
-            if(!cont)
-            {
-                return;
-            }
-
-            mus.push(obj);
-
-
-            localStorage.setItem('playlist_musics',JSON.stringify(mus));
-            musicScript.updatePlaylists();
-
-        }));
+        $('#choose-playlist').append($('<button></button>').html(item).on('click',function() {musicScript.choosePlaylist($(this).closest('.song'), $(this).html());}));
     });
     return songDiv;
+}
+
+
+musicScript.choosePlaylist = function(songDiv, playlist)
+{
+    songDiv.find('.addToPlaylist').remove();
+    songDiv.append($('<div></div>').addClass('playlist-name').html(playlist));
+    $('#choose-playlist').remove();
+
+    var obj=
+        {
+            'playlist_name': playlist,
+            'img': songDiv.children('img').attr('src'),
+            'player': songDiv.find('.musicDesc').children('span').html(),
+            'title': songDiv.find('.musicDesc').find('.title').html(),
+            'artist': songDiv.find('.musicDesc').find('.artist').html(),
+            'preview': songDiv.find('.music-player').find('audio').attr('src'),
+            'href': songDiv.find('.music-player').find('a').attr('href')
+        };
+
+
+    var mus=localStorage.getItem('playlist_musics');
+
+
+    if (!mus)
+    {
+        mus = [];
+    }
+    else
+    {
+        mus = JSON.parse(mus);
+
+    }
+
+
+    var cont=true;
+
+
+    $.each(mus, function(i){
+        if(mus[i].title === obj.title) {
+            cont=false;
+            alert('music already exist');
+
+            return ;
+        }
+    });
+
+    if(!cont)
+    {
+        return;
+    }
+
+    mus.push(obj);
+
+
+    localStorage.setItem('playlist_musics',JSON.stringify(mus));
+    musicScript.updatePlaylists();
 }
 
 

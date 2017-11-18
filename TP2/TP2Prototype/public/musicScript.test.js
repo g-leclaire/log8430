@@ -112,5 +112,15 @@ test('updatePlaylists', () => {
 
 test('addToPlaylist', () => {
   songHtml = musicScript.generateSongHtml(formattedSong, true);
+  
   expect(musicScript.addToPlaylist(songHtml).find("#choose-playlist").length).toBe(1);
+});
+
+test('choosePlaylist', () => {
+  songHtml = musicScript.generateSongHtml(formattedSong, true);
+  musicScript.choosePlaylist(songHtml, "MaPlaylist");
+  var newStoredSongs = JSON.parse(localStorage.getItem("playlist_musics"));
+
+  expect(newStoredSongs.length).toBe(2);
+  expect(newStoredSongs[1].playlist_name).toBe("MaPlaylist");
 });
