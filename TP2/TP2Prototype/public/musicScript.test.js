@@ -54,3 +54,11 @@ test('formatDeezerSong', () => {
   expect(formattedSong.link).toBe(deezerSong.link);
   expect(formattedSong.service).toBe("deezer");
 });
+
+test('getHashParams', () => {
+  var hash = "access_token=BQDtgdlpF18Z1ZV1A8_iARuqrCac0ANWmgbhSwr7WmmU05v6xATUHsiojKPCGvAzTZtsqEfIVHNwGbnaMjUJP9uOyIFDb8dz3DNMtRzCzTC0zytKYd3SGEAMT0T_j-OotPm_FeaDAh05spYipDdDceSz&refresh_token=AQBYTGyHmD42K7XNH8tMQ6cZcVymOt_au1hJ6tRpxFrw-cmrhUaqNkoeYBUdkVP1PElF5nFrvFWrQUvomai4CLHErZRA3WXXK-7YXp-T2e56WaPiHwHkMmaSiqDx25BUxRA";
+  expect(musicScript.getHashParams(hash).access_token.toBe("BQDtgdlpF18Z1ZV1A8_iARuqrCac0ANWmgbhSwr7WmmU05v6xATUHsiojKPCGvAzTZtsqEfIVHNwGbnaMjUJP9uOyIFDb8dz3DNMtRzCzTC0zytKYd3SGEAMT0T_j-OotPm_FeaDAh05spYipDdDceSz"));
+  expect(musicScript.getHashParams(hash).refresh_token.toBe("AQBYTGyHmD42K7XNH8tMQ6cZcVymOt_au1hJ6tRpxFrw-cmrhUaqNkoeYBUdkVP1PElF5nFrvFWrQUvomai4CLHErZRA3WXXK-7YXp-T2e56WaPiHwHkMmaSiqDx25BUxRA"));
+});
+
+

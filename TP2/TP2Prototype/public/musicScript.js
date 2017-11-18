@@ -334,17 +334,21 @@ function removePlaylist(el)
     updatePlaylists();
 }
 
+musicScript.getWindowHashParams = function() {
+    var test = window.location.hash.substring(1);
+    return musicScript.getHashParams(window.location.hash.substring(1));
+}
 
 /**
  * Obtains parameters from the hash of the URL
  * @return Object
  * Source : https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
  */
-function getHashParams()
+musicScript.getHashParams = function(hash)
 {
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
+        q = hash;
     while (e = r.exec(q))
     {
         hashParams[e[1]] = decodeURIComponent(e[2]);
@@ -361,26 +365,26 @@ function afficherMusique()
 
 
     //On va chercher les chansons a afficher de Deezer
-    getDeezerSongs();
+    //musicScript.getDeezerSongs();
     //On va chercher les chansons a afficher de Spotify
     getSpotifySongs();
-    getJamendoSongs();
+    //getJamendoSongs();
 }
 
 
-function sort()// Synchronous
+musicScript.sort = function(songDivs)// Synchronous
 {
     //Sort
-    $('#musiqueTab .song').sort(
+    /*songDivs.sort(
         function (a, b) {
             return $(a).find('p').text().toLowerCase() > $(b).find('p').text().toLowerCase();
         }).appendTo('#musiqueTab');
 
     //Find which music is in playlist
-    $('#musiqueTab .song').each(function()
+    songDivs.each(function()
     {
         var song=$(this);
-        var obj=
+        var obj =
             {
                 'playlist_name':$(this).html(),
                 'img': song.children('img').attr('src'),
@@ -401,7 +405,6 @@ function sort()// Synchronous
         else
         {
             mus = JSON.parse(mus);
-
         }
 
         var cont=true;
@@ -414,13 +417,13 @@ function sort()// Synchronous
                 return ;
             }
         });
-    });
+    });*/
 }
 
 
 function getSpotifySongs()
 {
-    var params = getHashParams();
+    var params = musicScript.getWindowHashParams();
 
     access_token = params.access_token;
     refresh_token = params.refresh_token;
@@ -449,7 +452,7 @@ function getSpotifySongs()
             results.forEach(function (song) {
                 $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song)));
             });
-            sort();// Sort all elements;
+            musicScript.sort($('#musiqueTab .song'));// Sort all elements;
         }
     });
 }
@@ -463,17 +466,18 @@ function getJamendoSongs()
             data.results.forEach(function (song) {
                 $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song)));
             });
-            sort();// Sort all elements;
+            musicScript.sort($('#musiqueTab .song'));// Sort all elements;
         })
 }
 
 
-function getDeezerSongs()
+musicScript.getDeezerSongs = function()
 {
-    DZ.api('/search/' + "track" + '?q=' + encodeURIComponent($('#searchField')), function (response) {
+    DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
         response.data.forEach(function (song) {
             $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song)));
         });
+        musicScript.sort($('#musiqueTab .song'));
     });
 }
 
