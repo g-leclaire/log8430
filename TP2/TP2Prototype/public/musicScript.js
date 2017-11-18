@@ -93,11 +93,8 @@ $(document).ready(function () {
     musicScript.updatePlaylists();
 });
 
-function addToPlaylist()
+ musicScript.addToPlaylist = function(songDiv)
 {
-    var song=$(this).closest('.song');
-
-
     var playlists=localStorage.getItem('playlists');
 
 
@@ -113,7 +110,7 @@ function addToPlaylist()
 
     $('#choose-playlist').remove();
 
-    song.append($('<div id="choose-playlist"><label>choose a playlist:</label></div>'));
+    songDiv.append($('<div id="choose-playlist"><label>choose a playlist:</label></div>'));
 
 
     playlists.forEach(function(item)
@@ -180,7 +177,7 @@ function addToPlaylist()
 
         }));
     });
-    // now do some stuff to animate
+    return songDiv;
 }
 
 
@@ -484,7 +481,7 @@ musicScript.generateSongHtml = function(song, isPlaylistView) {
             .append('<a href="' + song.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.player + '</a>')
         )
         .append(isPlaylistView ? $('<button class="removeFromPlaylist"></button>').text('x').on('click',function(){removeFromPlaylist(song)})
-            : $('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
+            : $('<button class="addToPlaylist"></button>').text('+').on('click', function() {musicScript.addToPlaylist($(this).closest('.song'))}))
 }
 
 

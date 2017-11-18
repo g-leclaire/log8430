@@ -105,8 +105,12 @@ test('removeFromPlaylistItem', () => {
 });
 
 test('updatePlaylists', () => {
-musicScript.updatePlaylists();
-expect(localStorage.getItem("playlist_musics")).toBe(initialPlaylistSongs);
-expect(localStorage.getItem("playlists")).toBe(initialPlaylists);
+  musicScript.updatePlaylists();
+  expect(localStorage.getItem("playlist_musics")).toBe(initialPlaylistSongs);
+  expect(localStorage.getItem("playlists")).toBe(initialPlaylists);
 });
 
+test('addToPlaylist', () => {
+  songHtml = musicScript.generateSongHtml(formattedSong, true);
+  expect(musicScript.addToPlaylist(songHtml).find("#choose-playlist").length).toBe(1);
+});
