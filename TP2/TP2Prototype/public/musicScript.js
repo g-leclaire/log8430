@@ -233,69 +233,54 @@ function updatePlaylists()
 
     }
 
-    var songs= localStorage.getItem('playlist_musics');
+    var songs = localStorage.getItem('playlist_musics');
 
     if(!songs)
     {
         return;
     }
 
-    songs= JSON.parse(songs);
+    songs = JSON.parse(songs);
 
     $('#playListTab').find('.song').remove();
-    songs.forEach(function(item)
+    songs.forEach(function(song)
     {
-        $('#playListTab').append(
-            $('<div></div>')
-                .addClass('song jamendo-song')
-                .append(
-                    $('<img>')
-                        .attr('src', item.img))
-                .append(
-                    $('<div></div>').addClass('musicDesc')
-                        .append($('<span ></span>').addClass('deezer-tag').html(item.player))
-                        .append($('<p></p>').addClass('title').text(item.title))
-                        .append($('<p></p>').addClass('artist').text(item.artist))
-                )
-                .append($('<div></div>').addClass('music-player')
-                    .append('<label>Preview:</label>')
-                    .append($('<audio controls></audio>')
-                        .append('<source>').attr('src', item.preview).prop('type', 'audio/mpeg')
-                    )
-                    .append('<a href="' + item.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on '+item.player+'</a>')
-                )
-                .append($('<div></div>').addClass('playlist-name').html(item.playlist_name))
-                .append($('<button class="removeFromPlaylist"></button>').text('x').on('click',function(){removeFromPlaylist(item)})))
+        $('#playListTab').append(musicScript.generateSongHtml(song, true));
     });
 }
 
 
-function removeFromPlaylist(item)
+function removeFromPlaylist(song)
 {
     //console.log(item);
     var playlists = localStorage.getItem('playlist_musics');
-    if (!playlists)
+    playlists = musicScript.removeFromPlaylistItem(song, playlists);
+    localStorage.setItem('playlist_musics', playlists);
+    updatePlaylists();
+}
+
+
+musicScript.removeFromPlaylistItem = function(song, playlistItem) {
+
+    var playlists;
+    if (!playlistItem)
     {
         playlists = [];
     }
     else
     {
-        playlists = JSON.parse(localStorage.getItem('playlist_musics'));
-
+        playlists = JSON.parse(playlistItem);
     }
 
-
     $.each(playlists, function(i){
-        if(playlists[i].title === item.title) {
+        if(playlists[i].title === song.title) {
             playlists.splice(i,1);
             return false;
         }
     });
 
-    localStorage.setItem('playlist_musics', JSON.stringify(playlists));
-    updatePlaylists();
+    return JSON.stringify(playlists);
 }
-
 
 function removePlaylist(el)
 {
@@ -307,7 +292,6 @@ function removePlaylist(el)
     else
     {
         playlists = JSON.parse(localStorage.getItem('playlists'));
-
     }
     var index = playlists.indexOf(el.siblings('span').html());
 
@@ -335,7 +319,6 @@ function removePlaylist(el)
 }
 
 musicScript.getWindowHashParams = function() {
-    var test = window.location.hash.substring(1);
     return musicScript.getHashParams(window.location.hash.substring(1));
 }
 
@@ -450,7 +433,7 @@ function getSpotifySongs()
 
             var results = response.tracks.items;
             results.forEach(function (song) {
-                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song)));
+                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
             });
             musicScript.sort($('#musiqueTab .song'));// Sort all elements;
         }
@@ -464,7 +447,7 @@ function getJamendoSongs()
         "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI($('#searchField').val())
         , function (data) {
             data.results.forEach(function (song) {
-                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song)));
+                $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song, false)));
             });
             musicScript.sort($('#musiqueTab .song'));// Sort all elements;
         })
@@ -475,21 +458,21 @@ musicScript.getDeezerSongs = function()
 {
     DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
         response.data.forEach(function (song) {
-            $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song)));
+            $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song, false)));
         });
         musicScript.sort($('#musiqueTab .song'));
     });
 }
 
-musicScript.generateSongHtml = function(song) {
+musicScript.generateSongHtml = function(song, isPlaylistView) {
     return $('<div></div>')
         .addClass('song jamendo-song')
         .append(
             $('<img>')
-                .attr('src', song.cover))
+                .attr('src', song.img))
         .append(
             $('<div></div>').addClass('musicDesc')
-                .append($('<span ></span>').addClass(song.service + '-tag').html(song.service))
+                .append($('<span ></span>').addClass(song.player + '-tag').html(song.player))
                 .append($('<p></p>').addClass('title').text(song.title))
                 .append($('<p></p>').addClass('artist').text(song.artist))
         )
@@ -498,9 +481,10 @@ musicScript.generateSongHtml = function(song) {
             .append($('<audio controls></audio>')
                 .append('<source>').attr('src', song.preview).prop('type', 'audio/mpeg')
             )
-            .append('<a href="' + song.link + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.service + '</a>')
+            .append('<a href="' + song.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.player + '</a>')
         )
-        .append($('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
+        .append(isPlaylistView ? $('<button class="removeFromPlaylist"></button>').text('x').on('click',function(){removeFromPlaylist(song)})
+            : $('<button class="addToPlaylist"></button>').text('+').on('click',addToPlaylist))
 }
 
 
@@ -508,10 +492,10 @@ musicScript.formatSpotifySong = function(song) {
     return {
         title: song.name,
         artist: song.artists[0].name,
-        cover: song.album.images[1].url,
+        img: song.album.images[1].url,
         preview: song.preview_url,
-        link: song.href,
-        service: "spotify"
+        href: song.href,
+        player: "spotify"
     };
 }
 
@@ -520,10 +504,10 @@ musicScript.formatJamendoSong = function(song) {
     return {
         title: song.name,
         artist: song.artist_name,
-        cover: song.album_image,
+        img: song.album_image,
         preview: song.audio,
-        link: song.shareurl,
-        service: "jamendo"
+        href: song.shareurl,
+        player: "jamendo"
     };
 }
 
@@ -532,10 +516,10 @@ musicScript.formatDeezerSong = function(song) {
     return {
         title: song.title,
         artist: song.artist.name,
-        cover: song.album.cover_small,
+        img: song.album.cover_small,
         preview: song.preview,
-        link: song.link,
-        service: "deezer"
+        href: song.link,
+        player: "deezer"
     };
 }
 

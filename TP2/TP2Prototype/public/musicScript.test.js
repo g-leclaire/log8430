@@ -7,19 +7,23 @@ var deezerSong = JSON.parse('{"id":118655608,"readable":true,"title":"Unspeakabl
 var formattedSong = {
     title: "Unspeakable World",
     artist: "GoGo Penguin",
-    cover: "https://e-cdns-images.dzcdn.net/images/cover/0eb8f51eb7f1d5cbe87b14cb5784d8cb/56x56-000000-80-0-0.jpg",
+    img: "https://e-cdns-images.dzcdn.net/images/cover/0eb8f51eb7f1d5cbe87b14cb5784d8cb/56x56-000000-80-0-0.jpg",
     preview: "https://e-cdns-preview-9.dzcdn.net/stream/992022ec4f11760ff134dd41c61c9e99-2.mp3",
-    link: "https://www.deezer.com/track/118655608",
-    service: "deezer"
+    href: "https://www.deezer.com/track/118655608",
+    player: "deezer"
 };
 
 test('generateSongHtml', () => {
-  var songHtml = musicScript.generateSongHtml(formattedSong);
+  var songHtml = musicScript.generateSongHtml(formattedSong, false);
 
   expect(songHtml.find("img").length).toBe(1);
   expect(songHtml.find(".musicDesc").length).toBe(1);
   expect(songHtml.find(".music-player").length).toBe(1);
   expect(songHtml.hasClass("song")).toBeTruthy();
+
+  songHtml = musicScript.generateSongHtml(formattedSong, true);
+
+  expect(songHtml.find("button").hasClass("removeFromPlaylist")).toBeTruthy();
 });
 
 test('formatSpotifySong', () => {
@@ -27,10 +31,10 @@ test('formatSpotifySong', () => {
 
   expect(formattedSong.title).toBe(spotifySong.name);
   expect(formattedSong.artist).toBe(spotifySong.artists[0].name);
-  expect(formattedSong.cover).toBe(spotifySong.album.images[1].url);
+  expect(formattedSong.img).toBe(spotifySong.album.images[1].url);
   expect(formattedSong.preview).toBe(spotifySong.preview_url);
-  expect(formattedSong.link).toBe(spotifySong.href);
-  expect(formattedSong.service).toBe("spotify");
+  expect(formattedSong.href).toBe(spotifySong.href);
+  expect(formattedSong.player).toBe("spotify");
 });
 
 test('formatJamendoSong', () => {
@@ -38,10 +42,10 @@ test('formatJamendoSong', () => {
 
   expect(formattedSong.title).toBe(jamendoSong.name);
   expect(formattedSong.artist).toBe(jamendoSong.artist_name);
-  expect(formattedSong.cover).toBe(jamendoSong.album_image);
+  expect(formattedSong.img).toBe(jamendoSong.album_image);
   expect(formattedSong.preview).toBe(jamendoSong.audio);
-  expect(formattedSong.link).toBe(jamendoSong.shareurl);
-  expect(formattedSong.service).toBe("jamendo");
+  expect(formattedSong.href).toBe(jamendoSong.shareurl);
+  expect(formattedSong.player).toBe("jamendo");
 });
 
 test('formatDeezerSong', () => {
@@ -49,16 +53,23 @@ test('formatDeezerSong', () => {
 
   expect(formattedSong.title).toBe(deezerSong.title);
   expect(formattedSong.artist).toBe(deezerSong.artist.name);
-  expect(formattedSong.cover).toBe(deezerSong.album.cover_small);
+  expect(formattedSong.img).toBe(deezerSong.album.cover_small);
   expect(formattedSong.preview).toBe(deezerSong.preview);
-  expect(formattedSong.link).toBe(deezerSong.link);
-  expect(formattedSong.service).toBe("deezer");
+  expect(formattedSong.href).toBe(deezerSong.link);
+  expect(formattedSong.player).toBe("deezer");
 });
 
 test('getHashParams', () => {
   var hash = "access_token=BQDtgdlpF18Z1ZV1A8_iARuqrCac0ANWmgbhSwr7WmmU05v6xATUHsiojKPCGvAzTZtsqEfIVHNwGbnaMjUJP9uOyIFDb8dz3DNMtRzCzTC0zytKYd3SGEAMT0T_j-OotPm_FeaDAh05spYipDdDceSz&refresh_token=AQBYTGyHmD42K7XNH8tMQ6cZcVymOt_au1hJ6tRpxFrw-cmrhUaqNkoeYBUdkVP1PElF5nFrvFWrQUvomai4CLHErZRA3WXXK-7YXp-T2e56WaPiHwHkMmaSiqDx25BUxRA";
-  expect(musicScript.getHashParams(hash).access_token.toBe("BQDtgdlpF18Z1ZV1A8_iARuqrCac0ANWmgbhSwr7WmmU05v6xATUHsiojKPCGvAzTZtsqEfIVHNwGbnaMjUJP9uOyIFDb8dz3DNMtRzCzTC0zytKYd3SGEAMT0T_j-OotPm_FeaDAh05spYipDdDceSz"));
-  expect(musicScript.getHashParams(hash).refresh_token.toBe("AQBYTGyHmD42K7XNH8tMQ6cZcVymOt_au1hJ6tRpxFrw-cmrhUaqNkoeYBUdkVP1PElF5nFrvFWrQUvomai4CLHErZRA3WXXK-7YXp-T2e56WaPiHwHkMmaSiqDx25BUxRA"));
+  expect(musicScript.getHashParams(hash).access_token).toBe("BQDtgdlpF18Z1ZV1A8_iARuqrCac0ANWmgbhSwr7WmmU05v6xATUHsiojKPCGvAzTZtsqEfIVHNwGbnaMjUJP9uOyIFDb8dz3DNMtRzCzTC0zytKYd3SGEAMT0T_j-OotPm_FeaDAh05spYipDdDceSz");
+  expect(musicScript.getHashParams(hash).refresh_token).toBe("AQBYTGyHmD42K7XNH8tMQ6cZcVymOt_au1hJ6tRpxFrw-cmrhUaqNkoeYBUdkVP1PElF5nFrvFWrQUvomai4CLHErZRA3WXXK-7YXp-T2e56WaPiHwHkMmaSiqDx25BUxRA");
 });
 
+test('removeFromPlaylistItem', () => {
+  var playlistItem = '[{"playlist_name":"play","img":"https://i.scdn.co/image/8030f39e07c486071ca737bc8748d71bcd70d1f6","player":"spotify","title":"Mmm Mmm Mmm Mmm","artist":"Crash Test Dummies","preview":"https://p.scdn.co/mp3-preview/5b230e95123f352c3a33b48ce6d081a185a15cad?cid=55a904c1f12a42238e0d4b6e10401cfd","href":"https://api.spotify.com/v1/tracks/31v2AQlx4pDI7kmnLxBkem"}]';
+  var song = JSON.parse('{"playlist_name":"play","img":"https://i.scdn.co/image/8030f39e07c486071ca737bc8748d71bcd70d1f6","player":"spotify","title":"Mmm Mmm Mmm Mmm","artist":"Crash Test Dummies","preview":"https://p.scdn.co/mp3-preview/5b230e95123f352c3a33b48ce6d081a185a15cad?cid=55a904c1f12a42238e0d4b6e10401cfd","href":"https://api.spotify.com/v1/tracks/31v2AQlx4pDI7kmnLxBkem"}');
+
+  playlistItem = musicScript.removeFromPlaylistItem(song, playlistItem);
+  expect(JSON.parse(playlistItem).length).toBe(0);
+});
 
