@@ -1,25 +1,17 @@
 var express = require("express");
 var router = express.Router();
+var request = require('request');
 
 router.get("/", function(req, res) {
-  return res.status(200).send("Ça fonctionne.");
+    return res.status(200).send("Ça fonctionne.");
+});
+
+
+router.get("/:query", function(req, res) {
+    JamendoAPI.searchSongs(res, req.params.query);
 });
 
 /*
-router.get("/:id", function(req, res) {
-  var Order = mongoose.model("Order");
-  var search = {};
-  search.id = req.params.id;
-
-  Order.find(search, function(err, orders) {
-	  if (orders !== null && orders.length === 1) {
-		  return res.status(200).json(orders[0]);
-	  } else {
-		  return res.sendStatus(404);
-	  }
-  });
-});
-
 router.post("/", function(req, res) {
   // Validate first name
   if (!validateString(req.body.firstName)) {
@@ -122,5 +114,103 @@ router.delete("/",  function(req, res) {
   });
 });
 */
+
+var SpotifyAPI = {
+    searchSongs: function() {
+        var params = musicScript.getWindowHashParams();
+
+        access_token = params.access_token;
+        refresh_token = params.refresh_token;
+        error = params.error;
+
+        /*On fait une requete pour raffraichir les tokens*/
+        $.ajax({
+            url: '/refresh_token',
+            data: {
+                'refresh_token': refresh_token
+            }
+        }).done(function (data) {
+            access_token = data.access_token;
+        });
+
+
+        /*On va chercher la valeur de la recherche*/
+        $.ajax({
+            url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent($('#searchField').val()) + '&type=track&limit=10',
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            success: function (response) {
+
+                var results = response.tracks.items;
+                results.forEach(function (song) {
+                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
+                });
+                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+            }
+        });
+    }
+}
+
+var JamendoAPI = {
+    searchSongs: function(res, query) {
+        request("https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI(query),
+            function (error, response, body) {
+                //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                var songs = [];
+                JSON.parse(body).results.forEach(function (song) {
+                    songs.push(formatJamendoSong(song, false));
+                });
+                res.status(200).send(songs);
+            });
+    }
+}
+
+var DeezerAPI = {
+    searchSongs: function() {
+        if ($('#searchField').val().length > 0) {
+            DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
+                var songs = [];
+                response.data.forEach(function (song) {
+                    songs.push(formatDeezerSong(song, false));
+                });
+            });
+        }
+    }
+}
+
+formatJamendoSong = function(song) {
+    return {
+        title: song.name,
+        artist: song.artist_name,
+        img: song.album_image,
+        preview: song.audio,
+        href: song.shareurl,
+        player: "jamendo"
+    };
+}
+
+
+formatDeezerSong = function(song) {
+    return {
+        title: song.title,
+        artist: song.artist.name,
+        img: song.album.cover_small,
+        preview: song.preview,
+        href: song.link,
+        player: "deezer"
+    };
+}
+
+formatSpotifySong = function(song) {
+    return {
+        title: song.name,
+        artist: song.artists[0].name,
+        img: song.album.images[1].url,
+        preview: song.preview_url,
+        href: song.href,
+        player: "spotify"
+    };
+}
 
 module.exports = router;
