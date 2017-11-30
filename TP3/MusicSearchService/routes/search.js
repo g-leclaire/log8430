@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var request = require('request');
+var test = require("../managers/test");
 
 router.get("/", function(req, res) {
     return res.status(200).send("Ça fonctionne.");
@@ -8,112 +9,12 @@ router.get("/", function(req, res) {
 
 
 router.get("/:query", function(req, res) {
-    JamendoAPI.searchSongs(res, req.params.query);
+    searchSongs(req, res);
 });
 
-/*
-router.post("/", function(req, res) {
-  // Validate first name
-  if (!validateString(req.body.firstName)) {
-    return res.status(400).send("Le prénom doit être une chaîne non vide.");
-  }
-  // Validate last name
-  if (!validateString(req.body.lastName)) {
-    return res.status(400).send("Le nom doit être une chaîne non vide.");
-  }
-  // Validate email
-  if (!validateEmail(req.body.email)) {
-    return res.status(400).send("L'adresse courriel est invalide.");
-  }
-  // Validate phone
-  if (!validatePhone(req.body.phone)) {
-    return res.status(400).send("Le numéro de téléphone est invalide.");
-  }
-  // Validate products
-  if (!validateProducts(req.body.products)) {
-    return res.status(400).send("Les produits de la commande sont invalides.");
-  }
-  // Validate order id
-  if (!validateInteger(req.body.id)) {
-    return res.status(400).send("L'identifiant de commande doit être un entier.");
-  }
-
-  // Check if all order products exist
-  var Product = mongoose.model("Product");
-  Product.find({}, function(err, existingProducts) {
-    if (existingProducts.length < 1) {
-      return res.status(400).send("Il n'y a pas de produits dans la base de données.");
-    }
-    else {
-      // Double loop to avoid doing a request for each order product
-      var oneIdIsInvalid = false;
-      req.body.products.forEach(function(orderProduct) {
-        var isIdValid = false;
-        existingProducts.forEach(function(existingProduct) {
-          if (existingProduct.id === orderProduct.id)
-            isIdValid = true;
-        });
-        if (!isIdValid) {
-          oneIdIsInvalid = true;
-        }
-      });
-      if (oneIdIsInvalid) {
-        return res.status(400).send("Un id de produit est invalide");
-      }
-
-      // Check if order id is unique
-      var Order = mongoose.model("Order");
-      Order.findOne({id: req.body.id}, function(err, order) {
-        if (order) {
-          return res.status(400).send("L'identifiant de commande est déjà utilisé");
-        }
-
-        // Create order
-        var newOrder = new Order({
-          id: req.body.id,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          phone: req.body.phone,
-          email: req.body.email,
-          products: req.body.products
-        });
-        newOrder.save(function (err, newOrder) {
-          if (err)
-            return res.status(400).send("Erreur de sauvegarde.");
-          else
-            return res.status(201).json(newOrder);
-        });
-      });
-    }
-  });
-});
-
-
-router.delete("/:id", function(req, res) {
-	var Order = mongoose.model("Order");
-  var search = {};
-  search.id = req.params.id;
-
-  Order.remove(search, function(err, result) {
-	  if (JSON.parse(result).n < 1) {
-      return res.sendStatus(404);
-    } else {
-      return res.sendStatus(204);
-	  }
-  });
-});
-
-router.delete("/",  function(req, res) {
-  var Order = mongoose.model("Order");
-  Order.remove({}, function(err){
-  	if(err)
-  		return res.send(err);
-  	else {
-      return res.status(204).json({message: 'Commandes supprimées!'});
-    }
-  });
-});
-*/
+function searchSongs(req, res) {
+    JamendoAPI.searchSongs(req.params.query, res, []);
+}
 
 var SpotifyAPI = {
     searchSongs: function() {
@@ -153,28 +54,29 @@ var SpotifyAPI = {
 }
 
 var JamendoAPI = {
-    searchSongs: function(res, query) {
+    searchSongs: function(query, res, songs) {
         request("https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI(query),
             function (error, response, body) {
-                //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                var songs = [];
+                console.log('Jamendo response: ', response && response.statusCode);
                 JSON.parse(body).results.forEach(function (song) {
                     songs.push(formatJamendoSong(song, false));
                 });
-                res.status(200).send(songs);
+                DeezerAPI.searchSongs(query, res, songs);
             });
     }
 }
 
 var DeezerAPI = {
-    searchSongs: function() {
-        if ($('#searchField').val().length > 0) {
-            DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
-                var songs = [];
-                response.data.forEach(function (song) {
-                    songs.push(formatDeezerSong(song, false));
+    searchSongs: function(query, res, songs) {
+        if (typeof query === 'string' && query.length > 0) {
+            request("https://api.deezer.com/search/track?q=" + encodeURI(query),
+                function (error, response, body) {
+                    console.log('Deezer response: ', response && response.statusCode);
+                    JSON.parse(body).data.forEach(function (song) {
+                        songs.push(formatDeezerSong(song, false));
+                    });
+                    res.status(200).send(songs);
                 });
-            });
         }
     }
 }
