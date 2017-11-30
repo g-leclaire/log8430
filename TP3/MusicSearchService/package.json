@@ -12,7 +12,8 @@
     "express": "~4.15.2",
     "express-session": "^1.15.5",
     "morgan": "~1.8.1",
-    "serve-favicon": "~2.4.2"
+    "serve-favicon": "~2.4.2",
+    "spotify-web-api-node": "^2.5.0"
   },
   "devDependencies": {
     "events": "^1.1.1",

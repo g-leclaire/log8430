@@ -3,53 +3,61 @@ var router = express.Router();
 var request = require('request');
 var test = require("../managers/test");
 
-router.get("/", function(req, res) {
-    return res.status(200).send("Ça fonctionne.");
+var SpotifyWebApi = require('spotify-web-api-node');
+
+var spotifyTokenStart = new Date();
+var spotifyTokenDuration = -1;
+
+// Create the api object with the credentials
+var spotifyApi = new SpotifyWebApi({
+  clientId : '55a904c1f12a42238e0d4b6e10401cfd',
+  clientSecret : '3f03dc78b1074383862c6dacea03062d'
 });
 
 
-router.get("/:query", function(req, res) {
+function refreshSpotifyToken(callback) {
+spotifyApi.clientCredentialsGrant()
+  .then(function(data) {
+    spotifyTokenStart = new Date();
+    spotifyTokenDuration = parseInt(data.body['expires_in']);
+    console.log('New spotify token: ' + data.body['access_token']);
+
+    // Save the access token so that it's used in future calls
+    spotifyApi.setAccessToken(data.body['access_token']);
+    if (callback)
+        callback();
+  }, function(err) {
+        console.log('Something went wrong when retrieving an access token', err);
+  });
+}
+
+router.get("/", function(req, res) {
+    console.log('query: ', req.query.q);
     searchSongs(req, res);
 });
 
+function SpotifySuccessCallback(data, res, songs) {
+    console.log("Spotify response: ", data.statusCode)
+    data.body.tracks.items.forEach(function(song) {
+        songs.push(formatSpotifySong(song));
+    });
+    return res.status(200).send(songs);
+}
+
 function searchSongs(req, res) {
-    JamendoAPI.searchSongs(req.params.query, res, []);
+    JamendoAPI.searchSongs(req.query.q, res, []);
 }
 
 var SpotifyAPI = {
-    searchSongs: function() {
-        var params = musicScript.getWindowHashParams();
-
-        access_token = params.access_token;
-        refresh_token = params.refresh_token;
-        error = params.error;
-
-        /*On fait une requete pour raffraichir les tokens*/
-        $.ajax({
-            url: '/refresh_token',
-            data: {
-                'refresh_token': refresh_token
-            }
-        }).done(function (data) {
-            access_token = data.access_token;
-        });
-
-
-        /*On va chercher la valeur de la recherche*/
-        $.ajax({
-            url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent($('#searchField').val()) + '&type=track&limit=10',
-            headers: {
-                'Authorization': 'Bearer ' + access_token
-            },
-            success: function (response) {
-
-                var results = response.tracks.items;
-                results.forEach(function (song) {
-                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
+    searchSongs: function(query, res, songs) {
+        if (getSpotifyTokenRemainingTime() > 0) {
+            spotifyApi.searchTracks(query)
+                .then(function(data) {SpotifySuccessCallback(data, res, songs)}, function(err) {
+                    return res.status(200).send(songs);
                 });
-                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
-            }
-        });
+        } else {
+            refreshSpotifyToken(function() {SpotifyAPI.searchSongs(query, res, songs)});
+        }
     }
 }
 
@@ -75,10 +83,16 @@ var DeezerAPI = {
                     JSON.parse(body).data.forEach(function (song) {
                         songs.push(formatDeezerSong(song, false));
                     });
-                    res.status(200).send(songs);
+                    SpotifyAPI.searchSongs(query, res, songs);
                 });
         }
     }
+}
+
+function getSpotifyTokenRemainingTime() {
+    var remainingTime = spotifyTokenDuration - (new Date() - spotifyTokenStart) / 1000;
+    console.log("Spotify token expires in", remainingTime, "seconds");
+    return remainingTime;
 }
 
 formatJamendoSong = function(song) {
