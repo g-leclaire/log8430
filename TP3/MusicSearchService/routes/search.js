@@ -9,7 +9,22 @@ router.get("/", function(req, res) {
     searchSongs(req, res);
 });
 
+router.options("/*", function(req, res, next){
+    console.log("TEST3");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.send(200);
+});
+
+router.options("/", function(req, res) {
+    console.log("TEST1");
+});
+
 function searchSongs(req, res) {
+    res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     Jamendo.searchSongs(req.query.q, res, []);
 }
 
