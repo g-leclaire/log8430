@@ -1,8 +1,18 @@
 {
-  "dependencies": {
-    "jquery": "^3.2.1"
-  },
+  "name": "TP2Prototype",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "test": "jest"
+    "start": "node app.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "jquery": "^3.2.1",
+    "request": "^2.83.0"
+  },
+  "devDependencies" : {
+    "jest": "^21.2.1"
   }
 }
