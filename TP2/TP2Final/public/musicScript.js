@@ -195,27 +195,23 @@ musicScript.updatePlaylists = function()
     playlists.forEach(function (element) {
         $('#playlists').append(
             $('<button></button>')
-                .append($('<span></span>').html(element)
-                    .on('click',function()
+                .on('click', function() {
+                    var playlist = $(this).find('span').html();
+                    $(this).addClass('active').siblings().removeClass('active');
+                    $('#playListTab').find('.song').each(function()
                     {
-                        var playlist=$(this).html();
-                        $(this).closest('button').addClass('active').siblings().removeClass('active');
-                        //console.log(playlist);
-                        $('#playListTab').find('.song').each(function()
+                        if(!$(this).find('.playlist-name:contains('+playlist+')').length)
                         {
-                            if(!$(this).find('.playlist-name:contains('+playlist+')').length)
-                            {
-                                $(this).closest('.song').hide();
-                            }
-                            else
-                            {
-                                $(this).closest('.song').show();
-                            }
-                        });
-                    })
-                )
+                            $(this).closest('.song').hide();
+                        }
+                        else
+                        {
+                            $(this).closest('.song').show();
+                        }
+                    });
+                })
+                .append($('<span></span>').html(element))
                 .append($('<i></i>').addClass('fa fa-times').on('click',function(){
-                    //removePlaylist
                     removePlaylist($(this));
                 }))
         )
