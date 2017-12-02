@@ -16,6 +16,13 @@ var client_id = '55a904c1f12a42238e0d4b6e10401cfd'; // Your client id
 var client_secret = '3f03dc78b1074383862c6dacea03062d'; // Your secret
 var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
 
+var bodyParser = require('body-parser')
+
+
+var router = express.Router();
+require("./lib/db");
+var Playlists = require("mongoose").model("Playlists"); //Inclusion du modele des produits 
+var PlaylistMusic = require("mongoose").model("PlaylistMusic"); //Inclusion du modele des commandes
 /**
  * Generates a random string containing numbers and letters
  * @param  {number} length The length of the string
@@ -34,9 +41,13 @@ var generateRandomString = function(length) {
 var stateKey = 'spotify_auth_state';
 
 var app = express();
-
+app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'))
    .use(cookieParser());
+   
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 
 app.get('/login', function(req, res) {
 
@@ -140,6 +151,166 @@ app.get('/refresh_token', function(req, res) {
     }
   });
 });
+
+app.get('/service/playlist', function(req, res){   
+    //On creer la requete
+    let productQuery = Playlists.find({}, {_id:0}, function(err, playlist){
+        if(err)
+        {
+            console.log("Erreur lors de la saisi des donnees de la bdd");
+        }
+		var playlists = [];
+		playlist.forEach(function(result)
+        {
+            //console.log(result);
+            playlists.push(result);
+        });
+		res.status(200, "OK").send(JSON.stringify(playlists));   
+    });
+});
+
+app.post("/service/playlist", function(req, res) {
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+
+		//console.log("Body :");
+		//console.log(body);
+		var newObject = new Playlists({name: body});
+		newObject.save(function(err)
+		{
+			if(err)
+			{
+				console.log("Erreur lors de la sauvegarde du nouveau produit");
+				res.status(400, "Bad Request").end();
+			}
+			else
+			{
+				//console.log("Saved!");
+				//console.log("Ajout de l'objet avec success!");
+				res.status(201, "Created").end();
+			}
+		});
+		res.status(200).end();
+	});			
+});
+
+app.delete("/service/playlist", function(req, res){
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+		//console.log("Trying to remove Playlist : " + body);
+		Playlists.remove({name: body}, function(err, numberRemoved){
+			if(numberRemoved.result.n == 0 || err)
+			{
+				console.log("Erreur lors de la suppression");
+			}
+			//console.log("Playlist retire!");
+			res.status(200).end();
+		});
+	});
+});
+
+app.get("/service/music/:playlist", function(req, res){
+	var paramPlaylistName = req.params.playlist;
+	//console.log(paramPlaylistName);
+	if(!paramPlaylistName)
+	{
+		res.status(401).end();
+		return;
+	}
+	//console.log("Playlist : " + paramPlaylistName);
+	let productQuery = PlaylistMusic.find({playlist_name: paramPlaylistName}, {_id:0}, function(err, playlist){
+        if(err)
+        {
+            console.log("Erreur lors de la saisi des donnees de la bdd");
+        }
+		var playlists = [];
+		playlist.forEach(function(result)
+        {
+            //console.log(result);
+            playlists.push(result);
+        });
+		res.status(200, "OK").send(JSON.stringify(playlists));
+	});		
+	
+});
+
+app.post("/service/music", function(req, res){
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+		var bodyJson = JSON.parse(body);
+		var newObject = new PlaylistMusic({
+			playlist_name: bodyJson.playlist_name,
+			img: bodyJson.img,
+			player: bodyJson.player,
+			title: bodyJson.title,
+			artist: bodyJson.artist,
+			preview: bodyJson.preview,
+			href: bodyJson.href
+		});
+		newObject.save(function(err)
+		{
+			if(err)
+			{
+				console.log("Erreur lors de la sauvegarde du nouveau produit");
+				res.status(400, "Bad Request").end();
+			}
+			else
+			{
+				//console.log("Saved!");
+				//console.log("Ajout de l'objet avec success!");
+				res.status(201, "Created").end();
+			}
+		});
+		res.status(200).end();
+	});
+});
+
+app.delete("/service/music", function(req, res){
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+		var bodyJson = JSON.parse(body);
+		//console.log("Trying to remove Playlist : " + body);
+		PlaylistMusic.remove({
+			playlist_name: bodyJson.playlist_name,
+			img: bodyJson.img,
+			player: bodyJson.player,
+			title: bodyJson.title,
+			artist: bodyJson.artist,
+			preview: bodyJson.preview,
+			href: bodyJson.href
+		}, function(err, numberRemoved){
+			if(numberRemoved.result.n == 0 || err)
+			{
+				console.log("Erreur lors de la suppression");
+			}
+			console.log("Chanson retire de la playlist " + bodyJson.playlist_name + "!");
+			res.status(200).end();
+		});
+	});
+});
+
+app.delete("/service/music/:playlist"), function(req, res){
+	var paramPlaylistName = req.params.playlist;
+	PlaylistMusic.remove({playlist_name: paramPlaylistName}, function(err, numberRemoved){
+		if(numberRemoved.result.n == 0 || err)
+		{
+			console.log("Erreur lors de la suppression des chansons");
+		}
+		res.status(200).end();
+	});
+}
 
 console.log('Listening on 8888');
 app.listen(8888);

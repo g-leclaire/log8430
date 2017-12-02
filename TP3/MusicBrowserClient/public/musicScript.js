@@ -31,8 +31,6 @@ $(document).ready(function () {
         $('#' + localStorage.getItem('current_tab')).trigger('click');
     }
 
-
-
     // Create playlist
     $('#create-playlist-form').on('submit', function (e) {
         e.preventDefault();
@@ -43,7 +41,40 @@ $(document).ready(function () {
 });
 
 musicScript.createPlaylist = function(form, playlistName) {
-    var playlists = localStorage.getItem('playlists');
+	$.ajax({
+		url: "/service/playlist",
+		type: "GET",
+		data: {},
+		contentType: "",
+		success:function(data){
+			console.log("DATA : ");
+			console.log(data);
+			var array = [];
+			JSON.parse(data).forEach(function(playlist){
+				if(playlist.name == playlistName)
+				{
+					alert('playlist name already taken');
+					form[0].reset();
+					musicScript.updatePlaylists();
+					return;
+				}
+				array.push(playlist.name);
+			});
+				array.push(playlistName);
+					$.ajax({
+						url: "/service/playlist",
+						type: "POST",
+						data: playlistName,
+						contentType: "application/json;"
+					});
+				//localStorage.setItem('playlists', JSON.stringify(playlists));
+			form[0].reset();
+			musicScript.updatePlaylists();
+		}
+	});
+	
+    //var playlists = localStorage.getItem('playlists');
+	/*
     if (!playlists)
     {
         playlists = [];
@@ -52,29 +83,38 @@ musicScript.createPlaylist = function(form, playlistName) {
     {
         playlists = JSON.parse(localStorage.getItem('playlists'));
     }
-
-    if ($.inArray(playlistName, playlists) != -1)
-    {
-        alert('playlist name already taken');
-    }
-    else
-    {
-        playlists.unshift(playlistName);
-
-        localStorage.setItem('playlists', JSON.stringify(playlists));
-        //console.log(playlists);
-    }
-    form[0].reset();
-    musicScript.updatePlaylists();
+	*/
+    
 }
 
 
 musicScript.addToPlaylist = function(songDiv)
 {
-    var playlists=localStorage.getItem('playlists');
+    //var playlists=localStorage.getItem('playlists');
+	$.ajax({
+		url: "/service/playlist",
+		type: "GET",
+		data: {},
+		contentType: "",
+		success:function(data){
+			
+		var playlists = [];
+		JSON.parse(data).forEach(function(playlist){
+			playlists.push(playlist.name);
+		});
+		$('#choose-playlist').remove();
+
+		songDiv.append($('<div id="choose-playlist"><label>choose a playlist:</label></div>'));
 
 
-    if(!playlists)
+		playlists.forEach(function(item)
+		{
+			$('#choose-playlist').append($('<button></button>').html(item).on('click',function() {musicScript.choosePlaylist($(this).closest('.song'), $(this).html());}));
+		});
+		return songDiv;
+	}});
+
+    /*if(!playlists)
     {
         playlists=[];
     }
@@ -94,6 +134,7 @@ musicScript.addToPlaylist = function(songDiv)
         $('#choose-playlist').append($('<button></button>').html(item).on('click',function() {musicScript.choosePlaylist($(this).closest('.song'), $(this).html());}));
     });
     return songDiv;
+	*/
 }
 
 
@@ -114,8 +155,7 @@ musicScript.choosePlaylist = function(songDiv, playlist)
             'href': songDiv.find('.music-player').find('a').attr('href')
         };
 
-
-    var mus=localStorage.getItem('playlist_musics');
+    /*var mus=localStorage.getItem('playlist_musics');
 
 
     if (!mus)
@@ -127,36 +167,133 @@ musicScript.choosePlaylist = function(songDiv, playlist)
         mus = JSON.parse(mus);
 
     }
+	*/
+	console.log(playlist);
+	var mus = $.ajax({
+		url: "/service/music/" + playlist,
+		type: "GET",
+		data: {},
+		contentType: "application/json; charset=utf-8",
+	}).then(function(musique)
+	{
+		 var cont=true;
 
+		$.each(mus, function(i){
+			if(mus[i].title === obj.title) {
+				cont=false;
+				alert('music already exist');
 
-    var cont=true;
+				return ;
+			}
+		});
 
-
-    $.each(mus, function(i){
-        if(mus[i].title === obj.title) {
-            cont=false;
-            alert('music already exist');
-
-            return ;
-        }
-    });
-
-    if(!cont)
-    {
-        return;
-    }
-
-    mus.push(obj);
-
-
-    localStorage.setItem('playlist_musics',JSON.stringify(mus));
-    musicScript.updatePlaylists();
+		//mus.push(obj);
+		$.ajax({
+			url: "/service/music",
+			type: "POST",
+			data: JSON.stringify(obj),
+			contentType: "application/json;"
+		});
+		musicScript.updatePlaylists();
+	});
+	//localStorage.setItem('playlist_musics',JSON.stringify(mus));
+    
 }
 
 
 musicScript.updatePlaylists = function()
 {
-    var playlists = localStorage.getItem('playlists');
+    $.ajax({
+		url: "/service/playlist",
+		type: "GET",
+		data: {},
+		contentType: "",
+		success:function(data){
+		//console.log("Updating!");
+		var playlists = [];
+		JSON.parse(data).forEach(function(playlist){
+			playlists.push(playlist.name);
+		});
+		
+		$('#playlists').empty();
+		playlists.forEach(function (element) {
+			$('#playlists').append(
+				$('<button></button>')
+					.append($('<span></span>').html(element)
+						.on('click',function()
+						{
+							var playlist=$(this).html();
+							localStorage.setItem("current_playlist", playlist);
+							$(this).closest('button').addClass('active').siblings().removeClass('active');
+							//console.log(playlist);
+							$('#playListTab').find('.song').each(function()
+							{
+								if(!$(this).find('.playlist-name:contains('+playlist+')').length)
+								{
+									$(this).closest('.song').hide();
+								}
+								else
+								{
+									$(this).closest('.song').show();
+								}
+							});
+							
+							$.ajax({
+								url: "/service/music/" + playlist,
+								type: "GET",
+								data: {},
+								contentType: "",
+							}).then(function(songs)
+							{
+								songs = JSON.parse(songs);
+								//console.log("SONGS : ");
+								//console.log(songs);
+								
+								$('#playListTab').find('.song').remove();
+								songs.forEach(function(song)
+								{
+									$('#playListTab').append(musicScript.generateSongHtml(song, true));
+								});
+							});							
+						})
+					)
+					.append($('<i></i>').addClass('fa fa-times').on('click',function(){
+						//removePlaylist
+						removePlaylist($(this));
+					}))
+			)
+		});
+
+		if(!$('#playlists button').length)
+		{
+			$('#playlists').append($('<h3></h3>').html('you have no playlist'));
+
+		}
+		
+		var nomPlaylist = localStorage.getItem("current_playlist");
+		if(!nomPlaylist)
+			nomPlaylist = "";
+		//var songs = localStorage.getItem('playlist_musics');
+		console.log("GET Music : ");
+		$.ajax({
+			url: "/service/music/" + nomPlaylist,
+			type: "GET",
+			data: {},
+			contentType: "",
+		}).then(function(songs)
+		{
+			//songs = JSON.parse(songs);
+			//console.log("SONGS : ");
+			//console.log(JSON.stringify(songs));
+			$('#playListTab').find('.song').remove();
+			songs.forEach(function(song)
+			{
+				$('#playListTab').append(musicScript.generateSongHtml(song, true));
+			});
+		});
+		
+	}});
+	/*var playlists = localStorage.getItem('playlists');
     if (!playlists)
     {
         playlists = [];
@@ -166,67 +303,35 @@ musicScript.updatePlaylists = function()
         playlists = JSON.parse(localStorage.getItem('playlists'));
 
     }
+	*/
 
-    $('#playlists').empty();
-    playlists.forEach(function (element) {
-        $('#playlists').append(
-            $('<button></button>')
-                .append($('<span></span>').html(element)
-                    .on('click',function()
-                    {
-                        var playlist=$(this).html();
-                        $(this).closest('button').addClass('active').siblings().removeClass('active');
-                        //console.log(playlist);
-                        $('#playListTab').find('.song').each(function()
-                        {
-                            if(!$(this).find('.playlist-name:contains('+playlist+')').length)
-                            {
-                                $(this).closest('.song').hide();
-                            }
-                            else
-                            {
-                                $(this).closest('.song').show();
-                            }
-                        });
-                    })
-                )
-                .append($('<i></i>').addClass('fa fa-times').on('click',function(){
-                    //removePlaylist
-                    removePlaylist($(this));
-                }))
-        )
-    });
-
-    if(!$('#playlists button').length)
-    {
-        $('#playlists').append($('<h3></h3>').html('you have no playlist'));
-
-    }
-
-    var songs = localStorage.getItem('playlist_musics');
-
-    if(!songs)
-    {
-        return;
-    }
-
-    songs = JSON.parse(songs);
-
-    $('#playListTab').find('.song').remove();
-    songs.forEach(function(song)
-    {
-        $('#playListTab').append(musicScript.generateSongHtml(song, true));
-    });
+    
 }
 
 
 function removeFromPlaylist(song)
 {
     //console.log(item);
-    var playlists = localStorage.getItem('playlist_musics');
-    playlists = musicScript.removeFromPlaylistItem(song, playlists);
-    localStorage.setItem('playlist_musics', playlists);
-    musicScript.updatePlaylists();
+    //var playlists = localStorage.getItem('playlist_musics');
+    //playlists = musicScript.removeFromPlaylistItem(song, playlists);
+    //localStorage.setItem('playlist_musics', playlists);
+	$.ajax({
+		url: "/service/music",
+		type: "DELETE",
+		data: JSON.stringify({
+			playlist_name: song.playlist_name,
+			img: song.img,
+			player: song.player,
+			title: song.title,
+			artist: song.artist,
+			preview: song.preview,
+			href: song.href
+		}),
+		contentType: "application/json;"
+	}).then(function(musique)
+	{
+		musicScript.updatePlaylists();
+	});
 }
 
 
@@ -254,7 +359,58 @@ musicScript.removeFromPlaylistItem = function(song, playlistItem) {
 
 function removePlaylist(el)
 {
-    var playlists = localStorage.getItem('playlists');
+	$.ajax({
+		url: "/service/playlist",
+		type: "GET",
+		data: {},
+		contentType: "",
+		success:function(data){
+			
+		var playlists = [];
+		JSON.parse(data).forEach(function(playlist){
+			playlists.push(playlist.name);
+		});
+		var index = playlists.indexOf(el.siblings('span').html());
+
+		if (index > -1)
+		{
+			playlists.splice(index, 1);
+
+			//remove songs in playlists
+			/*var songs = localStorage.getItem('playlist_musics');
+			if(songs)
+			{
+				songs= JSON.parse(songs);
+				$.each(songs, function(i){
+					if(songs[i].playlist_name === el.siblings('span').html()) {
+						songs.splice(i,1);
+						return false;
+					}
+				});
+				localStorage.setItem('playlist_musics',JSON.stringify(songs));
+			}*/
+			$.ajax({
+				url: "/service/music/" + el.siblings('span').html(),
+				type: "DELETE",
+				data: {},
+				contentType: "application/json;"
+			});
+			
+			
+		}
+		
+		$.ajax({
+			url: "/service/playlist",
+			type: "DELETE",
+			data: el.siblings('span').html(),
+			contentType: "application/json;"
+		}).then(function(musique)
+		{
+			musicScript.updatePlaylists();
+		});
+	}});
+    
+	/*var playlists = localStorage.getItem('playlists');
     if (!playlists)
     {
         playlists = [];
@@ -262,30 +418,11 @@ function removePlaylist(el)
     else
     {
         playlists = JSON.parse(localStorage.getItem('playlists'));
-    }
-    var index = playlists.indexOf(el.siblings('span').html());
+    }*/
+    
 
-    if (index > -1)
-    {
-        playlists.splice(index, 1);
-
-        //remove songs in playlists
-        var songs = localStorage.getItem('playlist_musics');
-        if(songs)
-        {
-            songs= JSON.parse(songs);
-            $.each(songs, function(i){
-                if(songs[i].playlist_name === el.siblings('span').html()) {
-                    songs.splice(i,1);
-                    return false;
-                }
-            });
-            localStorage.setItem('playlist_musics',JSON.stringify(songs));
-        }
-    }
-
-    localStorage.setItem('playlists', JSON.stringify(playlists));
-    musicScript.updatePlaylists();
+    //localStorage.setItem('playlists', JSON.stringify(playlists));
+    
 }
 
 
@@ -301,7 +438,7 @@ function afficherMusique()
             url: "http://localhost:8001/search?q=" + encodeURI($('#searchField').val()),
             data: {}
         }).done(function (data) {
-            console.log(data);
+            //console.log(data);
 			data.forEach(function (song) {
 				$('#musiqueTab').append(musicScript.generateSongHtml(song, false));
 			});
