@@ -1,0 +1,26 @@
+Guide d'utilisation de l'application
+
+Prérequis :
+- Avoir installé Node.js
+- Avoir installé un navigateur web
+
+Utilisation :
+1. Naviguer vers le répertoire "TP2Final" avec un invite de commande.
+2. Installer les dépendances avec la commande "npm install".
+3. Lancer le serveur avec la commande "npm start".
+4. Ouvrir un navigateur et entrer l'adresse "http://localhost:8888".
+5. Utiliser le bouton "Log in with Spotify" pour se connecter à Spotify.
+6. Modifier le contenu de la barre de recherche pour lancer une nouvelle recherche. La recherche est lancée automatiquement.
+
+Création de playlist :
+1. Cliquer sur l'onglet "Playlist".
+2. Entrer un nom de playlist.
+3. Cliquer sur le bouton "Create playlist". La nouvelle playlist devrait apparaître dans la section "My playlists".
+4. Cliquer sur l'onglet "Musique".
+5. Choisir un morceau et cliquer sur "+".
+6. Cliquer sur le nom de la nouvelle playlist. Le morceau est maintenant dans la nouvelle playlist.
+
+Tests unitaires :
+1. Naviguer vers le répertoire "TP2Final" avec un invite de commande.
+2. Si ce n'est pas déjà fait, installer les dépendances avec la commande "npm install".
+3. Lancer les tests avec la commande "npm test". Les résultats apparaissent dans la console et un rapport détaillé est créé dans le répertoire "TP2Final/coverage".
