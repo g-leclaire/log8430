@@ -432,17 +432,22 @@ function removePlaylist(el)
 function afficherMusique()
 {
     //On affiche la tab correspondante
-    
+	
+	// Enlever les anciennes chansons
+	$("#musiqueTab").show().find('.song').remove();
+	// Afficher le loading
+	$('#loading').show();
 
-    // On lance les recherches sur les différents api
-    //([SpotifyAPI, JamendoAPI, DeezerAPI]).forEach(api => api.searchSongs());
+    // On lance les recherches avec le service de recherche
 	$.ajax({
             url: "http://localhost:8001/search?q=" + encodeURI($('#searchField').val()),
             data: {}
         }).done(function (data) {
 			// Afficher seulement la réponse du dernier appel
 			if (data.query === $('#searchField').val()) {
-				$("#musiqueTab").show().find('.song').remove();
+				// Cacher le loading
+				$('#loading').hide();
+				// Ajouter les nouvelles chansons
 				data.songs.forEach(function (song) {
 					$('#musiqueTab').append(musicScript.generateSongHtml(song, false));
 				});
