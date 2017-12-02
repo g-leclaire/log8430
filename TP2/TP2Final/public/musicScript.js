@@ -283,7 +283,8 @@ function removePlaylist(el)
     {
         playlists = JSON.parse(localStorage.getItem('playlists'));
     }
-    var index = playlists.indexOf(el.siblings('span').html());
+    var playlistName = el.siblings('span').html();
+    var index = playlists.indexOf(playlistName);
 
     if (index > -1)
     {
@@ -293,13 +294,13 @@ function removePlaylist(el)
         var songs = localStorage.getItem('playlist_musics');
         if(songs)
         {
-            songs= JSON.parse(songs);
-            $.each(songs, function(i){
-                if(songs[i].playlist_name === el.siblings('span').html()) {
+            songs = JSON.parse(songs);
+            for (var i = songs.length - 1; i >= 0; i--) {
+                if(songs[i].playlist_name === playlistName) {
                     songs.splice(i,1);
-                    return false;
                 }
-            });
+            }
+
             localStorage.setItem('playlist_musics',JSON.stringify(songs));
         }
     }
