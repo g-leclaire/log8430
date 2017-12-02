@@ -188,7 +188,6 @@ musicScript.updatePlaylists = function()
     else
     {
         playlists = JSON.parse(localStorage.getItem('playlists'));
-
     }
 
     $('#playlists').empty();
@@ -200,13 +199,14 @@ musicScript.updatePlaylists = function()
                     $(this).addClass('active').siblings().removeClass('active');
                     $('#playListTab').find('.song').each(function()
                     {
-                        if(!$(this).find('.playlist-name:contains('+playlist+')').length)
+                        var songDiv = $(this);
+                        if(!songDiv.find('.playlist-name:contains('+playlist+')').length)
                         {
-                            $(this).closest('.song').hide();
+                            songDiv.hide();
                         }
                         else
                         {
-                            $(this).closest('.song').show();
+                            songDiv.show();
                         }
                     });
                 })
@@ -456,7 +456,7 @@ musicScript.sort = function(songDivs)// Synchronous
 
 
 musicScript.generateSongHtml = function(song, isPlaylistView) {
-    return $('<div></div>')
+    var songDiv = $('<div></div>')
         .addClass('song jamendo-song')
         .append(
             $('<img>')
@@ -476,6 +476,12 @@ musicScript.generateSongHtml = function(song, isPlaylistView) {
         )
         .append(isPlaylistView ? $('<button class="removeFromPlaylist"></button>').text('x').on('click',function(){removeFromPlaylist(song)})
             : $('<button class="addToPlaylist"></button>').text('+').on('click', function() {musicScript.addToPlaylist($(this).closest('.song'))}))
+
+    if (typeof song.playlist_name !== 'undefined') {
+        songDiv.append($('<div></div>').addClass('playlist-name').html(song.playlist_name));
+    }
+
+    return songDiv;
 }
 
 
