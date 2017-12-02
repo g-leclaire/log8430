@@ -215,6 +215,24 @@ app.delete("/service/playlist", function(req, res){
 	});
 });
 
+app.get("/service/music", function(req, res){
+
+	let productQuery = PlaylistMusic.find({}, function(err, playlist){
+			if(err)
+			{
+					console.log("Erreur lors de la saisi des donnees de la bdd");
+					res.status(500).end();
+			}
+		  var songs = [];
+		  playlist.forEach(function(result)
+      {
+          songs.push(result);
+      });
+	  	res.status(200, "OK").send(JSON.stringify(songs));
+	});		
+	
+});
+
 app.get("/service/music/:playlist", function(req, res){
 	var paramPlaylistName = req.params.playlist;
 	//console.log(paramPlaylistName);

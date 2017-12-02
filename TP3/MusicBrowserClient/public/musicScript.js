@@ -448,60 +448,40 @@ function afficherMusique()
 				data.songs.forEach(function (song) {
 					$('#musiqueTab').append(musicScript.generateSongHtml(song, false));
 				});
+
+				updatePlaylistButtons();
 			}
         });
 }
 
+function updatePlaylistButtons() {
+	var mus = $.ajax({
+		url: "/service/music",
+		type: "GET",
+		data: {},
+		contentType: "application/json; charset=utf-8",
+	}).then(function(musique)
+	{
+		var songDivs = $('#musiqueTab .song');
+		songDivs.each(function()
+		{
+			var songDiv = $(this);
+			var song =
+			{
+				'title': songDiv.find('.musicDesc').find('.title').html(),
+				'artist': songDiv.find('.musicDesc').find('.artist').html(),
+			};
 
-musicScript.sort = function(songDivs)// Synchronous
-{
-    //Sort
-    // Seems broken. Commented to increase test coverage
-    /*songDivs.sort(
-        function (a, b) {
-            return $(a).find('p').text().toLowerCase() > $(b).find('p').text().toLowerCase();
-        }).appendTo('#musiqueTab');
-
-    //Find which music is in playlist
-    songDivs.each(function()
-    {
-        var song=$(this);
-        var obj =
-            {
-                'playlist_name':$(this).html(),
-                'img': song.children('img').attr('src'),
-                'player': song.find('.musicDesc').children('span').html(),
-                'title': song.find('.musicDesc').find('.title').html(),
-                'artist': song.find('.musicDesc').find('.artist').html(),
-                'preview': song.find('.music-player').find('audio').attr('src'),
-                'href': song.find('.music-player').find('a').attr('href')
-            };
-
-
-        var mus=localStorage.getItem('playlist_musics');
-
-        if (!mus)
-        {
-            mus = [];
-        }
-        else
-        {
-            mus = JSON.parse(mus);
-        }
-
-        var cont=true;
-
-        $.each(mus, function(i){
-            if(mus[i].title === obj.title) {
-                cont=false;
-                song.find('.addToPlaylist').remove();
-                song.append($('<div></div>').addClass('playlist-name').html(mus[i].playlist_name));
-                return ;
-            }
-        });
-    });*/
+			JSON.parse(musique).forEach(function(playlistSong) {
+				if(playlistSong.title === song.title && playlistSong.artist === song.artist) {
+					songDiv.find('.addToPlaylist').remove();
+					songDiv.append($('<div></div>').addClass('playlist-name').html(playlistSong.playlist_name));
+					return;
+				}
+			});
+		});
+	});
 }
-
 
 musicScript.generateSongHtml = function(song, isPlaylistView) {
     return $('<div></div>')
