@@ -43,7 +43,7 @@ var Jamendo = {
 
 var Deezer = {
     searchSongs: function(query, res, songs) {
-        if (typeof query === 'string' && query.length > 0) {
+        if (typeof query === 'string' && query.length > 0) { // No results for empty query
             request("https://api.deezer.com/search/track?q=" + encodeURI(query),
                 function (error, response, body) {
                     console.log('Deezer response: ', response && response.statusCode);
@@ -54,6 +54,9 @@ var Deezer = {
                     }
                     Spotify.searchSongs(query, res, songs);
                 });
+        }
+        else {
+            Spotify.searchSongs(query, res, songs);
         }
     },
     formatSong: function(song) {
@@ -71,18 +74,23 @@ var Deezer = {
 var Spotify = {
     searchSongs: function(query, res, songs) {
         if (this.getTokenRemainingTime() > 0) {
-            this.api.searchTracks(query)
-                .then(function(data) {
-                    console.log("Spotify response: ", data.statusCode)
-                    if (data.statusCode === 200) {
-                        data.body.tracks.items.forEach(function(song) {
-                            songs.push(Spotify.formatSong(song));
-                        });
-                    }
-                    return res.status(songs.length > 0 ? 200 : 500).send(songs);
-            }, function(err) {
-                    return res.status(songs.length > 0 ? 200 : 500).send(songs);
-                });
+            if (typeof query === 'string' && query.length > 0) { // No results for empty query
+                this.api.searchTracks(query)
+                    .then(function(data) {
+                        console.log("Spotify response: ", data.statusCode)
+                        if (data.statusCode === 200) {
+                            data.body.tracks.items.forEach(function(song) {
+                                songs.push(Spotify.formatSong(song));
+                            });
+                        }
+                        return res.status(songs.length > 0 ? 200 : 500).send(songs);
+                }, function(err) {
+                        return res.status(songs.length > 0 ? 200 : 500).send(songs);
+                    });
+            }
+            else {
+                return res.status(songs.length > 0 ? 200 : 500).send(songs);
+            }
         } else {
             this.refreshToken(function() {Spotify.searchSongs(query, res, songs)});
         }
