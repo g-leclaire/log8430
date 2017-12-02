@@ -83,12 +83,12 @@ var Spotify = {
                                 songs.push(Spotify.formatSong(song));
                             });
                         }
-                        return sendResponse(res, songs);
+                        return sendResponse(query, res, songs);
                     }, function(err) {
-                        return sendResponse(res, songs);
+                        return sendResponse(query, res, songs);
                     });
             } else {
-                return sendResponse(res, songs);
+                return sendResponse(query, res, songs);
             }
         } else {
             this.refreshToken(function() {Spotify.searchSongs(query, res, songs)});
@@ -132,14 +132,17 @@ var Spotify = {
     tokenDuration: -1
 }
 
-function sendResponse(res, songs) {
+function sendResponse(query, res, songs) {
     if (songs.length > 0) {
         songs.sort(compareTitles);
         res.status(200);
     } else {
         res.status(500);
     }
-    res.send(songs);
+    res.send({
+        query: query,
+        songs: songs
+    });
 }
 
 function compareTitles(a,b) {

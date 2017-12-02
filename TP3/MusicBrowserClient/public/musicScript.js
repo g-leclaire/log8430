@@ -6,6 +6,8 @@ if (typeof require !== "undefined") {
 // Variable to be exported for jest tests
 var musicScript = {};
 
+var waitingForResponse = 0;
+
 //Fonction appellée à l'ouverture de la page
 $(document).ready(function () {
 
@@ -430,7 +432,7 @@ function removePlaylist(el)
 function afficherMusique()
 {
     //On affiche la tab correspondante
-    $("#musiqueTab").show().find('.song').remove();
+    
 
     // On lance les recherches sur les différents api
     //([SpotifyAPI, JamendoAPI, DeezerAPI]).forEach(api => api.searchSongs());
@@ -438,10 +440,13 @@ function afficherMusique()
             url: "http://localhost:8001/search?q=" + encodeURI($('#searchField').val()),
             data: {}
         }).done(function (data) {
-            //console.log(data);
-			data.forEach(function (song) {
-				$('#musiqueTab').append(musicScript.generateSongHtml(song, false));
-			});
+			// Afficher seulement la réponse du dernier appel
+			if (data.query === $('#searchField').val()) {
+				$("#musiqueTab").show().find('.song').remove();
+				data.songs.forEach(function (song) {
+					$('#musiqueTab').append(musicScript.generateSongHtml(song, false));
+				});
+			}
         });
 }
 
