@@ -120,12 +120,13 @@ var Spotify = {
         return remainingTime;
     },
     formatSong: function(song) {
+		console.log(song);
         return {
             title: song.name,
             artist: song.artists[0].name,
             img: song.album.images[1].url,
             preview: song.preview_url,
-            href: song.href,
+            href: song.external_urls.spotify,
             player: "spotify"
         };
     },
