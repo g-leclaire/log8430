@@ -515,7 +515,7 @@ musicScript.formatSpotifySong = function(song) {
         artist: song.artists[0].name,
         img: song.album.images[1].url,
         preview: song.preview_url,
-        href: song.href,
+        href: song.external_urls.spotify,
         player: "spotify"
     };
 }
