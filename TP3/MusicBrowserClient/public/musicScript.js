@@ -44,13 +44,11 @@ $(document).ready(function () {
 
 musicScript.createPlaylist = function(form, playlistName) {
 	$.ajax({
-		url: "/service/playlist",
+		url: "http://localhost:8002/dbb/service/playlist",
 		type: "GET",
 		data: {},
 		contentType: "",
 		success:function(data){
-			console.log("DATA : ");
-			console.log(data);
 			var array = [];
 			JSON.parse(data).forEach(function(playlist){
 				if(playlist.name == playlistName)
@@ -63,15 +61,18 @@ musicScript.createPlaylist = function(form, playlistName) {
 				array.push(playlist.name);
 			});
 				array.push(playlistName);
-					$.ajax({
-						url: "/service/playlist",
-						type: "POST",
-						data: playlistName,
-						contentType: "application/json;"
-					});
+				$.ajax({
+					url: "http://localhost:8002/dbb/service/playlist",
+					type: "POST",
+					data: playlistName,
+					contentType: "application/json;"
+				}).then(function(err)
+				{
+					form[0].reset();
+					musicScript.updatePlaylists();
+				});
 				//localStorage.setItem('playlists', JSON.stringify(playlists));
-			form[0].reset();
-			musicScript.updatePlaylists();
+			
 		}
 	});
 	
@@ -94,7 +95,7 @@ musicScript.addToPlaylist = function(songDiv)
 {
     //var playlists=localStorage.getItem('playlists');
 	$.ajax({
-		url: "/service/playlist",
+		url: "http://localhost:8002/dbb/service/playlist",
 		type: "GET",
 		data: {},
 		contentType: "",
@@ -170,9 +171,8 @@ musicScript.choosePlaylist = function(songDiv, playlist)
 
     }
 	*/
-	console.log(playlist);
 	var mus = $.ajax({
-		url: "/service/music/" + playlist,
+		url: "http://localhost:8002/dbb/service/music/" + playlist,
 		type: "GET",
 		data: {},
 		contentType: "application/json; charset=utf-8",
@@ -184,19 +184,19 @@ musicScript.choosePlaylist = function(songDiv, playlist)
 			if(mus[i].title === obj.title) {
 				cont=false;
 				alert('music already exist');
-
 				return ;
 			}
 		});
 
 		//mus.push(obj);
 		$.ajax({
-			url: "/service/music",
+			url: "http://localhost:8002/dbb/service/music",
 			type: "POST",
 			data: JSON.stringify(obj),
 			contentType: "application/json;"
+		}).then(function(err){
+			musicScript.updatePlaylists();
 		});
-		musicScript.updatePlaylists();
 	});
 	//localStorage.setItem('playlist_musics',JSON.stringify(mus));
     
@@ -206,7 +206,7 @@ musicScript.choosePlaylist = function(songDiv, playlist)
 musicScript.updatePlaylists = function()
 {
     $.ajax({
-		url: "/service/playlist",
+		url: "http://localhost:8002/dbb/service/playlist",
 		type: "GET",
 		data: {},
 		contentType: "",
@@ -228,26 +228,25 @@ musicScript.updatePlaylists = function()
 
 						$('#playListTab').find('.song').each(function()
 						{
-							if(!$(this).find('.playlist-name:contains('+playlist+')').length)
+							var songDiv = $(this);
+							if(!songDiv.find('.playlist-name:contains('+playlist+')').length)
 							{
-								$(this).closest('.song').hide();
+								songDiv.hide();
 							}
 							else
 							{
-								$(this).closest('.song').show();
+								songDiv.show();
 							}
 						});
 						
 						$.ajax({
-							url: "/service/music/" + playlist,
+							url: "http://localhost:8002/dbb/service/music/" + playlist,
 							type: "GET",
 							data: {},
 							contentType: "",
 						}).then(function(songs)
 						{
 							songs = JSON.parse(songs);
-							//console.log("SONGS : ");
-							//console.log(songs);
 							
 							$('#playListTab').find('.song').remove();
 							songs.forEach(function(song)
@@ -273,24 +272,20 @@ musicScript.updatePlaylists = function()
 		if(!nomPlaylist)
 			nomPlaylist = "";
 		//var songs = localStorage.getItem('playlist_musics');
-		console.log("GET Music : ");
 		$.ajax({
-			url: "/service/music/" + nomPlaylist,
+			url: "http://localhost:8002/dbb/service/music/" + nomPlaylist,
 			type: "GET",
 			data: {},
 			contentType: "",
 		}).then(function(songs)
 		{
-			//songs = JSON.parse(songs);
-			//console.log("SONGS : ");
-			//console.log(JSON.stringify(songs));
+			songs = JSON.parse(songs);
 			$('#playListTab').find('.song').remove();
 			songs.forEach(function(song)
 			{
 				$('#playListTab').append(musicScript.generateSongHtml(song, true));
 			});
 		});
-		
 	}});
 	/*var playlists = localStorage.getItem('playlists');
     if (!playlists)
@@ -315,7 +310,7 @@ function removeFromPlaylist(song)
     //playlists = musicScript.removeFromPlaylistItem(song, playlists);
     //localStorage.setItem('playlist_musics', playlists);
 	$.ajax({
-		url: "/service/music",
+		url: "http://localhost:8002/dbb/service/music",
 		type: "DELETE",
 		data: JSON.stringify({
 			playlist_name: song.playlist_name,
@@ -359,7 +354,7 @@ musicScript.removeFromPlaylistItem = function(song, playlistItem) {
 function removePlaylist(el)
 {
 	$.ajax({
-		url: "/service/playlist",
+		url: "http://localhost:8002/dbb/service/playlist",
 		type: "GET",
 		data: {},
 		contentType: "",
@@ -370,7 +365,6 @@ function removePlaylist(el)
 			playlists.push(playlist.name);
 		});
 		var index = playlists.indexOf(el.siblings('span').html());
-
 		if (index > -1)
 		{
 			playlists.splice(index, 1);
@@ -389,24 +383,26 @@ function removePlaylist(el)
 				localStorage.setItem('playlist_musics',JSON.stringify(songs));
 			}*/
 			$.ajax({
-				url: "/service/music/" + el.siblings('span').html(),
+				url: "http://localhost:8002/dbb/service/music/" + el.siblings('span').html(),
 				type: "DELETE",
 				data: {},
 				contentType: "application/json;"
+			}).then(function(err){	
+				$.ajax({
+					url: "http://localhost:8002/dbb/service/playlist",
+					type: "DELETE",
+					data: el.siblings('span').html(),
+					contentType: "application/json;"
+				}).then(function(musique)
+				{
+					musicScript.updatePlaylists();
+				});
 			});
 			
 			
 		}
 		
-		$.ajax({
-			url: "/service/playlist",
-			type: "DELETE",
-			data: el.siblings('span').html(),
-			contentType: "application/json;"
-		}).then(function(musique)
-		{
-			musicScript.updatePlaylists();
-		});
+		
 	}});
     
 	/*var playlists = localStorage.getItem('playlists');
@@ -456,7 +452,7 @@ function afficherMusique()
 
 function updatePlaylistButtons() {
 	var mus = $.ajax({
-		url: "/service/music",
+		url: "http://localhost:8002/dbb/service/music",
 		type: "GET",
 		data: {},
 		contentType: "application/json; charset=utf-8",

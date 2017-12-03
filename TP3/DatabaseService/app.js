@@ -25,8 +25,7 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-app.use("/search", require("./routes/search"));
-
+app.use("/dbb", require("./routes/dbb"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
