@@ -1,11 +1,11 @@
-Guide d'utilisation de l'application
+Guide d'utilisation de l'application (TP2)
 
 Prérequis :
 - Avoir installé Node.js
 - Avoir installé un navigateur web
 
 Utilisation :
-1. Naviguer vers le répertoire "TP2Final" avec un invite de commande.
+1. Naviguer vers le répertoire "TP2Final" avec une invite de commande.
 2. Installer les dépendances avec la commande "npm install".
 3. Lancer le serveur avec la commande "npm start".
 4. Ouvrir un navigateur et entrer l'adresse "http://localhost:8888".
