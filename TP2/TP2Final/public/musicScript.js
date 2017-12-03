@@ -209,7 +209,7 @@ musicScript.updatePlaylists = function()
                 })
                 .append($('<span></span>').html(element))
                 .append($('<i></i>').addClass('fa fa-times').on('click',function(){
-                    removePlaylist($(this));
+                    musicScript.removePlaylist($(this));
                 }))
         )
     });
