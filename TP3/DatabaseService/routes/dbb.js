@@ -9,7 +9,6 @@ var PlaylistMusic = require("mongoose").model("PlaylistMusic"); //Inclusion du m
 
 router.get("/", function(req, res) {
 	allowAccess(res);
-    //searchSongs(req, res);
 });
 
 router.get('/service/playlist', function(req, res){ 
@@ -23,7 +22,6 @@ router.get('/service/playlist', function(req, res){
 		var playlists = [];
 		playlist.forEach(function(result)
         {
-            //console.log(result);
             playlists.push(result);
         });
 		res.status(200, "OK").send(JSON.stringify(playlists));   
@@ -44,8 +42,6 @@ router.post("/service/playlist", function(req, res) {
 	});
 	req.on("end", function(){
 
-		//console.log("Body :");
-		//console.log(body);
 		var newObject = new Playlists({name: body});
 		newObject.save(function(err)
 		{
@@ -56,8 +52,6 @@ router.post("/service/playlist", function(req, res) {
 			}
 			else
 			{
-				//console.log("Saved!");
-				//console.log("Ajout de l'objet avec success!");
 				res.status(201, "Created").end();
 			}
 		});
@@ -72,13 +66,11 @@ router.delete("/service/playlist", function(req, res){
 		body += data;
 	});
 	req.on("end", function(){
-		//console.log("Trying to remove Playlist : " + body);
 		Playlists.remove({name: body}, function(err, numberRemoved){
 			if(numberRemoved.result.n == 0 || err)
 			{
 				console.log("Erreur lors de la suppression");
 			}
-			//console.log("Playlist retire!");
 			res.status(200).end();
 		});
 	});
@@ -118,7 +110,6 @@ router.get("/service/music/:playlist", function(req, res){
 		var playlists = [];
 		playlist.forEach(function(result)
         {
-            //console.log(result);
             playlists.push(result);
         });
 		res.status(200, "OK").send(JSON.stringify(playlists));
@@ -157,8 +148,6 @@ router.post("/service/music", function(req, res){
 			}
 			else
 			{
-				//console.log("Saved!");
-				//console.log("Ajout de l'objet avec success!");
 				res.status(201, "Created").end();
 			}
 		});
@@ -175,7 +164,6 @@ router.delete("/service/music", function(req, res){
 	});
 	req.on("end", function(){
 		var bodyJson = JSON.parse(body);
-		//console.log("Trying to remove Playlist : " + body);
 		PlaylistMusic.remove({
 			playlist_name: bodyJson.playlist_name,
 			img: bodyJson.img,
