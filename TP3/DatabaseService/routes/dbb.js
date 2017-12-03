@@ -11,7 +11,57 @@ router.get("/", function(req, res) {
 	allowAccess(res);
 });
 
-router.get('/service/playlist', function(req, res){ 
+router.get('/service/playlist', getPlaylist);
+
+router.options("/service/playlist", function(req, res) {
+	allowAccess(res);
+	console.log("OPTIONS PLAYLIST!!!");
+	res.status(200).end();
+});
+
+router.post("/service/playlist", postPlaylist);
+
+router.delete("/service/playlist", deletePlaylist);
+
+router.get("/service/music", getMusic);
+
+router.options("/service/music", function(req, res) {
+	allowAccess(res);
+	res.status(200).end();
+});
+
+router.post("/service/music", postMusic);
+
+router.delete("/service/music", deleteMusic);
+
+router.options("/service/music/:playlist", function(req, res) {
+	allowAccess(res);
+	console.log("OPTIONS Music in Playlist!!!");
+	res.status(200).end();
+});
+
+router.delete("/service/music/:playlist", deleteMusicPlaylist);
+
+router.get("/service/music/:playlist", getMusicPlaylist);
+
+function getMusic(req, res) {
+	allowAccess(res);
+	let productQuery = PlaylistMusic.find({}, function(err, playlist){
+			if(err)
+			{
+					console.log("Erreur lors de la saisi des donnees de la bdd");
+					res.status(500).end();
+			}
+		  var songs = [];
+		  playlist.forEach(function(result)
+      {
+          songs.push(result);
+      });
+	  	res.status(200, "OK").send(JSON.stringify(songs));
+	});	
+}
+
+function getPlaylist(req, res) {
 	allowAccess(res);
 	//On creer la requete
     let productQuery = Playlists.find({}, {_id:0}, function(err, playlist){
@@ -26,75 +76,9 @@ router.get('/service/playlist', function(req, res){
         });
 		res.status(200, "OK").send(JSON.stringify(playlists));   
     });
-});
+}
 
-router.options("/service/playlist", function(req, res) {
-	allowAccess(res);
-	console.log("OPTIONS PLAYLIST!!!");
-	res.status(200).end();
-});
-
-router.post("/service/playlist", function(req, res) {
-	allowAccess(res);
-	var body = "";
-	req.on("data", function(data){
-		body += data;
-	});
-	req.on("end", function(){
-
-		var newObject = new Playlists({name: body});
-		newObject.save(function(err)
-		{
-			if(err)
-			{
-				console.log("Erreur lors de la sauvegarde du nouveau produit");
-				res.status(400, "Bad Request").end();
-			}
-			else
-			{
-				res.status(201, "Created").end();
-			}
-		});
-		res.status(200).end();
-	});			
-});
-
-router.delete("/service/playlist", function(req, res){
-	allowAccess(res);
-	var body = "";
-	req.on("data", function(data){
-		body += data;
-	});
-	req.on("end", function(){
-		Playlists.remove({name: body}, function(err, numberRemoved){
-			if(numberRemoved.result.n == 0 || err)
-			{
-				console.log("Erreur lors de la suppression");
-			}
-			res.status(200).end();
-		});
-	});
-});
-
-router.get("/service/music", function(req, res){
-	allowAccess(res);
-	let productQuery = PlaylistMusic.find({}, function(err, playlist){
-			if(err)
-			{
-					console.log("Erreur lors de la saisi des donnees de la bdd");
-					res.status(500).end();
-			}
-		  var songs = [];
-		  playlist.forEach(function(result)
-      {
-          songs.push(result);
-      });
-	  	res.status(200, "OK").send(JSON.stringify(songs));
-	});		
-	
-});
-
-router.get("/service/music/:playlist", function(req, res){
+function getMusicPlaylist(req, res) {
 	allowAccess(res);
 	var paramPlaylistName = req.params.playlist;
 	if(!paramPlaylistName)
@@ -113,16 +97,10 @@ router.get("/service/music/:playlist", function(req, res){
             playlists.push(result);
         });
 		res.status(200, "OK").send(JSON.stringify(playlists));
-	});		
-	
-});
+	});	
+}
 
-router.options("/service/music", function(req, res) {
-	allowAccess(res);
-	res.status(200).end();
-});
-
-router.post("/service/music", function(req, res){
+function postMusic(req, res) {
 	allowAccess(res);
 	var body = "";
 	req.on("data", function(data){
@@ -153,9 +131,26 @@ router.post("/service/music", function(req, res){
 		});
 		res.status(200).end();
 	});
-});
+}
 
-router.delete("/service/music", function(req, res){
+function deletePlaylist(req, res) {
+	allowAccess(res);
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+		Playlists.remove({name: body}, function(err, numberRemoved){
+			if(numberRemoved.result.n == 0 || err)
+			{
+				console.log("Erreur lors de la suppression");
+			}
+			res.status(200).end();
+		});
+	});
+}
+
+function deleteMusic(req, res) {
 	allowAccess(res);
 	console.log("DELETE Music");
 	var body = "";
@@ -181,15 +176,9 @@ router.delete("/service/music", function(req, res){
 			res.status(200).end();
 		});
 	});
-});
+}
 
-router.options("/service/music/:playlist", function(req, res) {
-	allowAccess(res);
-	console.log("OPTIONS Music in Playlist!!!");
-	res.status(200).end();
-});
-
-router.delete("/service/music/:playlist", function(req, res){
+function deleteMusicPlaylist(req, res) {
 	allowAccess(res);
 	var paramPlaylistName = req.params.playlist;
 	PlaylistMusic.remove({playlist_name: paramPlaylistName}, function(err, numberRemoved){
@@ -199,7 +188,32 @@ router.delete("/service/music/:playlist", function(req, res){
 		}
 		res.status(200).end();
 	});
-});
+}
+
+function postPlaylist(req, res) {
+	allowAccess(res);
+	var body = "";
+	req.on("data", function(data){
+		body += data;
+	});
+	req.on("end", function(){
+
+		var newObject = new Playlists({name: body});
+		newObject.save(function(err)
+		{
+			if(err)
+			{
+				console.log("Erreur lors de la sauvegarde du nouveau produit");
+				res.status(400, "Bad Request").end();
+			}
+			else
+			{
+				res.status(201, "Created").end();
+			}
+		});
+		res.status(200).end();
+	});
+}
 
 function allowAccess(res) {
 	res.header('Access-Control-Allow-Credentials', true);
