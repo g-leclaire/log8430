@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var request = require('request');
-var test = require("../managers/test");
 
 var bodyParser = require('body-parser')
 require("../lib/db");
@@ -9,16 +8,12 @@ var Playlists = require("mongoose").model("Playlists"); //Inclusion du modele de
 var PlaylistMusic = require("mongoose").model("PlaylistMusic"); //Inclusion du modele des commandes
 
 router.get("/", function(req, res) {
-	res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	allowAccess(res);
     //searchSongs(req, res);
 });
 
 router.get('/service/playlist', function(req, res){ 
-	res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	allowAccess(res);
 	//On creer la requete
     let productQuery = Playlists.find({}, {_id:0}, function(err, playlist){
         if(err)
@@ -36,19 +31,13 @@ router.get('/service/playlist', function(req, res){
 });
 
 router.options("/service/playlist", function(req, res) {
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	console.log("OPTIONS PLAYLIST!!!");
 	res.status(200).end();
 });
 
 router.post("/service/playlist", function(req, res) {
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	var body = "";
 	req.on("data", function(data){
 		body += data;
@@ -77,10 +66,7 @@ router.post("/service/playlist", function(req, res) {
 });
 
 router.delete("/service/playlist", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	var body = "";
 	req.on("data", function(data){
 		body += data;
@@ -99,10 +85,7 @@ router.delete("/service/playlist", function(req, res){
 });
 
 router.get("/service/music", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	let productQuery = PlaylistMusic.find({}, function(err, playlist){
 			if(err)
 			{
@@ -120,10 +103,7 @@ router.get("/service/music", function(req, res){
 });
 
 router.get("/service/music/:playlist", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	var paramPlaylistName = req.params.playlist;
 	if(!paramPlaylistName)
 	{
@@ -147,18 +127,12 @@ router.get("/service/music/:playlist", function(req, res){
 });
 
 router.options("/service/music", function(req, res) {
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	res.status(200).end();
 });
 
 router.post("/service/music", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	var body = "";
 	req.on("data", function(data){
 		body += data;
@@ -193,10 +167,8 @@ router.post("/service/music", function(req, res){
 });
 
 router.delete("/service/music", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');console.log("DELETE Music");
+	allowAccess(res);
+	console.log("DELETE Music");
 	var body = "";
 	req.on("data", function(data){
 		body += data;
@@ -224,19 +196,13 @@ router.delete("/service/music", function(req, res){
 });
 
 router.options("/service/music/:playlist", function(req, res) {
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	console.log("OPTIONS Music in Playlist!!!");
 	res.status(200).end();
 });
 
 router.delete("/service/music/:playlist", function(req, res){
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+	allowAccess(res);
 	var paramPlaylistName = req.params.playlist;
 	PlaylistMusic.remove({playlist_name: paramPlaylistName}, function(err, numberRemoved){
 		if(numberRemoved.result.n == 0 || err)
@@ -246,5 +212,12 @@ router.delete("/service/music/:playlist", function(req, res){
 		res.status(200).end();
 	});
 });
+
+function allowAccess(res) {
+	res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
+	res.header('Access-Control-Allow-Headers','X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+}
 
 module.exports = router;
