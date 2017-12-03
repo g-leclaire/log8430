@@ -22,14 +22,12 @@ $(document).ready(function () {
         $(this).addClass('active').siblings().removeClass('active');
         localStorage.setItem('current_tab', $(this).prop('id'))
         $('.tabcontent').hide();
-        //console.log(localStorage);
         $('#' + $(this).data('tab')).show();
 
     })
 
     if (localStorage.getItem('current_tab'))
     {
-        //console.log(localStorage);
         $('#' + localStorage.getItem('current_tab')).trigger('click');
     }
 
@@ -71,29 +69,14 @@ musicScript.createPlaylist = function(form, playlistName) {
 					form[0].reset();
 					musicScript.updatePlaylists();
 				});
-				//localStorage.setItem('playlists', JSON.stringify(playlists));
 			
 		}
 	});
-	
-    //var playlists = localStorage.getItem('playlists');
-	/*
-    if (!playlists)
-    {
-        playlists = [];
-    }
-    else
-    {
-        playlists = JSON.parse(localStorage.getItem('playlists'));
-    }
-	*/
-    
 }
 
 
 musicScript.addToPlaylist = function(songDiv)
 {
-    //var playlists=localStorage.getItem('playlists');
 	$.ajax({
 		url: "http://localhost:8002/dbb/service/playlist",
 		type: "GET",
@@ -116,28 +99,6 @@ musicScript.addToPlaylist = function(songDiv)
 		});
 		return songDiv;
 	}});
-
-    /*if(!playlists)
-    {
-        playlists=[];
-    }
-    else
-    {
-        playlists=JSON.parse(playlists);
-    }
-
-
-    $('#choose-playlist').remove();
-
-    songDiv.append($('<div id="choose-playlist"><label>choose a playlist:</label></div>'));
-
-
-    playlists.forEach(function(item)
-    {
-        $('#choose-playlist').append($('<button></button>').html(item).on('click',function() {musicScript.choosePlaylist($(this).closest('.song'), $(this).html());}));
-    });
-    return songDiv;
-	*/
 }
 
 
@@ -158,19 +119,6 @@ musicScript.choosePlaylist = function(songDiv, playlist)
             'href': songDiv.find('.music-player').find('a').attr('href')
         };
 
-    /*var mus=localStorage.getItem('playlist_musics');
-
-
-    if (!mus)
-    {
-        mus = [];
-    }
-    else
-    {
-        mus = JSON.parse(mus);
-
-    }
-	*/
 	var mus = $.ajax({
 		url: "http://localhost:8002/dbb/service/music/" + playlist,
 		type: "GET",
@@ -188,7 +136,6 @@ musicScript.choosePlaylist = function(songDiv, playlist)
 			}
 		});
 
-		//mus.push(obj);
 		$.ajax({
 			url: "http://localhost:8002/dbb/service/music",
 			type: "POST",
@@ -197,9 +144,7 @@ musicScript.choosePlaylist = function(songDiv, playlist)
 		}).then(function(err){
 			musicScript.updatePlaylists();
 		});
-	});
-	//localStorage.setItem('playlist_musics',JSON.stringify(mus));
-    
+	}); 
 }
 
 
@@ -211,7 +156,7 @@ musicScript.updatePlaylists = function()
 		data: {},
 		contentType: "",
 		success:function(data){
-		//console.log("Updating!");
+
 		var playlists = [];
 		JSON.parse(data).forEach(function(playlist){
 			playlists.push(playlist.name);
@@ -271,7 +216,7 @@ musicScript.updatePlaylists = function()
 		var nomPlaylist = localStorage.getItem("current_playlist");
 		if(!nomPlaylist)
 			nomPlaylist = "";
-		//var songs = localStorage.getItem('playlist_musics');
+
 		$.ajax({
 			url: "http://localhost:8002/dbb/service/music/" + nomPlaylist,
 			type: "GET",
@@ -287,28 +232,11 @@ musicScript.updatePlaylists = function()
 			});
 		});
 	}});
-	/*var playlists = localStorage.getItem('playlists');
-    if (!playlists)
-    {
-        playlists = [];
-    }
-    else
-    {
-        playlists = JSON.parse(localStorage.getItem('playlists'));
-
-    }
-	*/
-
-    
 }
 
 
 function removeFromPlaylist(song)
 {
-    //console.log(item);
-    //var playlists = localStorage.getItem('playlist_musics');
-    //playlists = musicScript.removeFromPlaylistItem(song, playlists);
-    //localStorage.setItem('playlist_musics', playlists);
 	$.ajax({
 		url: "http://localhost:8002/dbb/service/music",
 		type: "DELETE",
@@ -370,18 +298,6 @@ function removePlaylist(el)
 			playlists.splice(index, 1);
 
 			//remove songs in playlists
-			/*var songs = localStorage.getItem('playlist_musics');
-			if(songs)
-			{
-				songs= JSON.parse(songs);
-				$.each(songs, function(i){
-					if(songs[i].playlist_name === el.siblings('span').html()) {
-						songs.splice(i,1);
-						return false;
-					}
-				});
-				localStorage.setItem('playlist_musics',JSON.stringify(songs));
-			}*/
 			$.ajax({
 				url: "http://localhost:8002/dbb/service/music/" + el.siblings('span').html(),
 				type: "DELETE",
@@ -404,20 +320,6 @@ function removePlaylist(el)
 		
 		
 	}});
-    
-	/*var playlists = localStorage.getItem('playlists');
-    if (!playlists)
-    {
-        playlists = [];
-    }
-    else
-    {
-        playlists = JSON.parse(localStorage.getItem('playlists'));
-    }*/
-    
-
-    //localStorage.setItem('playlists', JSON.stringify(playlists));
-    
 }
 
 
