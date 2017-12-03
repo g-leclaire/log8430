@@ -405,7 +405,7 @@ var DeezerAPI = {
 //Fonction affichant le contenu de la tab Musique
 function afficherMusique()
 {
-    //On affiche la tab correspondante
+    // Enlever les chansons existantes
     $("#musiqueTab").show().find('.song').remove();
 
     // On lance les recherches sur les différents api
@@ -417,11 +417,27 @@ musicScript.sort = function(songDivs)// Synchronous
 {
     //Sort
     // Seems broken. Commented to increase test coverage
+    //$("#musiqueTab").find('.song').remove();
     /*songDivs.sort(
         function (a, b) {
             return $(a).find('p').text().toLowerCase() > $(b).find('p').text().toLowerCase();
-        }).appendTo('#musiqueTab');
+        }).appendTo('#musiqueTab');*/
+    
+    var songs = songDivs.get();
+    songs.sort(
+        function (a, b) {
+            aTitle = $(a).find('.title').text().toLowerCase();
+            bTitle = $(b).find('.title').text().toLowerCase();
+            var isABefore = aTitle < bTitle;
+            console.log(aTitle, isABefore, bTitle);
+            return isABefore ? -1 : 1;
+        });
+    
+        for (var i = 0; i < songs.length; i++) {
+        songs[i].parentNode.appendChild(songs[i]);
+    }
 
+    /*
     //Find which music is in playlist
     songDivs.each(function()
     {
