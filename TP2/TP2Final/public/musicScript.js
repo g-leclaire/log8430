@@ -24,14 +24,12 @@ $(document).ready(function () {
         $(this).addClass('active').siblings().removeClass('active');
         localStorage.setItem('current_tab', $(this).prop('id'))
         $('.tabcontent').hide();
-        //console.log(localStorage);
         $('#' + $(this).data('tab')).show();
 
     })
 
     if (localStorage.getItem('current_tab'))
     {
-        //console.log(localStorage);
         $('#' + localStorage.getItem('current_tab')).trigger('click');
     }
 
@@ -86,7 +84,6 @@ musicScript.createPlaylist = function(form, playlistName) {
         playlists.unshift(playlistName);
 
         localStorage.setItem('playlists', JSON.stringify(playlists));
-        //console.log(playlists);
     }
     form[0].reset();
     musicScript.updatePlaylists();
@@ -242,7 +239,6 @@ musicScript.updatePlaylists = function()
 
 function removeFromPlaylist(song)
 {
-    //console.log(item);
     var playlists = localStorage.getItem('playlist_musics');
     playlists = musicScript.removeFromPlaylistItem(song, playlists);
     localStorage.setItem('playlist_musics', playlists);
@@ -351,18 +347,21 @@ var SpotifyAPI = {
 
 
         /*On va chercher la valeur de la recherche*/
+        var query = $('#searchField').val();
         $.ajax({
-            url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent($('#searchField').val()) + '&type=track&limit=10',
+            url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track&limit=10',
             headers: {
                 'Authorization': 'Bearer ' + access_token
             },
             success: function (response) {
-
-                var results = response.tracks.items;
-                results.forEach(function (song) {
-                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
-                });
-                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+                // Only use the response if the search query has not changed
+                if (query === $('#searchField').val()) {
+                    var results = response.tracks.items;
+                    results.forEach(function (song) {
+                        $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatSpotifySong(song, false)));
+                    });
+                    musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+                }
             }
         });
     }
@@ -370,25 +369,33 @@ var SpotifyAPI = {
 
 var JamendoAPI = {
     searchSongs: function() {
+        var query = $('#searchField').val();
         $.getJSON(
-            "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI($('#searchField').val())
-            , function (data) {
-                data.results.forEach(function (song) {
-                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song, false)));
-                });
-                musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+            "https://api.jamendo.com/v3.0/tracks/?client_id=d328628b&format=jsonpretty&limit=20&namesearch=" + encodeURI(query),
+            function (data) {
+                // Only use the response if the search query has not changed
+                if (query === $('#searchField').val()) {
+                    data.results.forEach(function (song) {
+                        $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatJamendoSong(song, false)));
+                    });
+                    musicScript.sort($('#musiqueTab .song'));// Sort all elements;
+                }
             });
     }
 }
 
 var DeezerAPI = {
     searchSongs: function() {
-        if ($('#searchField').val().length > 0) {
-            DZ.api('/search/' + "track" + '?q=' + encodeURI($('#searchField').val()), function (response) {
-                response.data.forEach(function (song) {
-                    $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song, false)));
-                });
-                musicScript.sort($('#musiqueTab .song'));
+        var query = $('#searchField').val();
+        if (query.length > 0) {
+            DZ.api('/search/' + "track" + '?q=' + encodeURI(query), function (response) {
+                // Only use the response if the search query has not changed
+                if (query === $('#searchField').val()) {
+                    response.data.forEach(function (song) {
+                        $('#musiqueTab').append(musicScript.generateSongHtml(musicScript.formatDeezerSong(song, false)));
+                    });
+                    musicScript.sort($('#musiqueTab .song'));
+                }
             });
         }
     }
