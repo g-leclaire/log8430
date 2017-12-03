@@ -64,7 +64,7 @@ test('formatSpotifySong', () => {
   expect(formattedSong.artist).toBe(spotifySong.artists[0].name);
   expect(formattedSong.img).toBe(spotifySong.album.images[1].url);
   expect(formattedSong.preview).toBe(spotifySong.preview_url);
-  expect(formattedSong.href).toBe(spotifySong.href);
+  expect(formattedSong.href).toBe(spotifySong.external_urls.spotify);
   expect(formattedSong.player).toBe("spotify");
 });
 
@@ -137,3 +137,19 @@ test('createPlaylist', () => {
 
   expect(newPlaylists.length).toBe(2);
 });
+
+test('removePlaylist', () => {
+  var playlist = $('<button></button>').append($('<span></span>').html('MaPlaylist'));
+  musicScript.removePlaylist(playlist);
+  var newPlaylists = JSON.parse(localStorage.getItem("playlists"));
+  expect(newPlaylists.length).toBe(2);
+})
+
+test('sort', () => {
+  var songDivs = $('');
+  songDivs.append($(musicScript.generateSongHtml(formattedSong))).append(musicScript.generateSongHtml(musicScript.formatJamendoSong(jamendoSong)));
+  var newSongDiv = $('');
+  newSongDiv.append($(musicScript.generateSongHtml(formattedSong))).append(musicScript.generateSongHtml(musicScript.formatJamendoSong(jamendoSong)));
+  musicScript.sort(songDivs);
+  expect(newSongDiv.html()).toBe(songDivs.html());
+})

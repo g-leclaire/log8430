@@ -462,14 +462,10 @@ function updatePlaylistButtons() {
 		songDivs.each(function()
 		{
 			var songDiv = $(this);
-			var song =
-			{
-				'title': songDiv.find('.musicDesc').find('.title').html(),
-				'artist': songDiv.find('.musicDesc').find('.artist').html(),
-			};
+			var songHref = songDiv.find('.music-player').find('a').attr('href');
 
 			JSON.parse(musique).forEach(function(playlistSong) {
-				if(playlistSong.title === song.title && playlistSong.artist === song.artist) {
+				if(playlistSong.href === songHref) {
 					songDiv.find('.addToPlaylist').remove();
 					songDiv.append($('<div></div>').addClass('playlist-name').html(playlistSong.playlist_name));
 					return;
@@ -480,7 +476,7 @@ function updatePlaylistButtons() {
 }
 
 musicScript.generateSongHtml = function(song, isPlaylistView) {
-    return $('<div></div>')
+    var songDiv = $('<div></div>')
         .addClass('song jamendo-song')
         .append(
             $('<img>')
@@ -499,5 +495,11 @@ musicScript.generateSongHtml = function(song, isPlaylistView) {
             .append('<a href="' + song.href + '" target="_blank"><i class="fa fa-volume-up" aria-hidden="true"></i>\nFull song on ' + song.player + '</a>')
         )
         .append(isPlaylistView ? $('<button class="removeFromPlaylist"></button>').text('x').on('click',function(){removeFromPlaylist(song)})
-            : $('<button class="addToPlaylist"></button>').text('+').on('click', function() {musicScript.addToPlaylist($(this).closest('.song'))}))
+			: $('<button class="addToPlaylist"></button>').text('+').on('click', function() {musicScript.addToPlaylist($(this).closest('.song'))}))
+		
+		if (typeof song.playlist_name !== 'undefined') {
+			songDiv.append($('<div></div>').addClass('playlist-name').html(song.playlist_name));
+		}
+
+		return songDiv;
 }
