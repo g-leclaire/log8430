@@ -268,7 +268,7 @@ musicScript.removeFromPlaylistItem = function(song, playlistItem) {
     return JSON.stringify(playlists);
 }
 
-function removePlaylist(el)
+musicScript.removePlaylist = function(el)
 {
     var playlists = localStorage.getItem('playlists');
     if (!playlists)
