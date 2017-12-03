@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var request = require('request');
-var test = require("../managers/test");
 var SpotifyWebApi = require('spotify-web-api-node');
 
 router.get("/", function(req, res) {
