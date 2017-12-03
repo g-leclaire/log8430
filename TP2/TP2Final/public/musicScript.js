@@ -416,13 +416,6 @@ function afficherMusique()
 musicScript.sort = function(songDivs)// Synchronous
 {
     //Sort
-    // Seems broken. Commented to increase test coverage
-    //$("#musiqueTab").find('.song').remove();
-    /*songDivs.sort(
-        function (a, b) {
-            return $(a).find('p').text().toLowerCase() > $(b).find('p').text().toLowerCase();
-        }).appendTo('#musiqueTab');*/
-    
     var songs = songDivs.get();
     songs.sort(
         function (a, b) {
@@ -437,22 +430,11 @@ musicScript.sort = function(songDivs)// Synchronous
         songs[i].parentNode.appendChild(songs[i]);
     }
 
-    /*
-    //Find which music is in playlist
+    //Find which music is in playlist to add the playlist name
     songDivs.each(function()
     {
-        var song=$(this);
-        var obj =
-            {
-                'playlist_name':$(this).html(),
-                'img': song.children('img').attr('src'),
-                'player': song.find('.musicDesc').children('span').html(),
-                'title': song.find('.musicDesc').find('.title').html(),
-                'artist': song.find('.musicDesc').find('.artist').html(),
-                'preview': song.find('.music-player').find('audio').attr('src'),
-                'href': song.find('.music-player').find('a').attr('href')
-            };
-
+        var songDiv = $(this);
+        var songHref = songDiv.find('.music-player').find('a').attr('href');
 
         var mus=localStorage.getItem('playlist_musics');
 
@@ -465,17 +447,14 @@ musicScript.sort = function(songDivs)// Synchronous
             mus = JSON.parse(mus);
         }
 
-        var cont=true;
-
         $.each(mus, function(i){
-            if(mus[i].title === obj.title) {
-                cont=false;
-                song.find('.addToPlaylist').remove();
-                song.append($('<div></div>').addClass('playlist-name').html(mus[i].playlist_name));
+            if(mus[i].href === songHref) {
+                songDiv.find('.addToPlaylist').remove();
+                songDiv.append($('<div></div>').addClass('playlist-name').html(mus[i].playlist_name));
                 return ;
             }
         });
-    });*/
+    });
 }
 
 
